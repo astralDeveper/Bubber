@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "306651826618",
+    "project_id": "bubber-3ca15",
+    "storage_bucket": "bubber-3ca15.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:306651826618:android:c3215e583ca4a010673583",
+        "android_client_info": {
+          "package_name": "com.bubber"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlh6N56Em8s4N-_7beLJu5uE7T-gUvC2E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

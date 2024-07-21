@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/ABeeZee-Italic.ttf",
+      "sha1": "01ee49994920178bf5d94d47e2fba54c32f204fe"
+    },
+    {
+      "path": "src/assets/fonts/ABeeZee-Regular.ttf",
+      "sha1": "3228dce6045041ccde6ce7a12ebbcc52bbc257bd"
+    },
+    {
+      "path": "src/assets/fonts/Actor-Regular.ttf",
+      "sha1": "268b45daabcf92f58ea797e0719e4ccbcfdc2327"
+    }
+  ]
+}
