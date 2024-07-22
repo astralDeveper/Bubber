@@ -8,71 +8,68 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {Appl, Appl_B, Back_Arrow, Face, Goo} from '../../assets/Images';
-import { API } from '../Api';
+import {API} from '../Api';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {SocketContext} from '../../context/SocketContext';
 
 const Signup = ({navigation}) => {
+  const {setUserInstance} = useContext(SocketContext);
   const [email, setEmail] = useState();
   const [pass, setPass] = useState();
   const [name, setName] = useState();
   const [cpass, setCPass] = useState();
   const [token, setToken] = useState();
 
-  const handleSignUp = () => {
-
-  
-    if (!name.trim() || !email.trim() || !pass.trim()) {
-      Alert.alert("Error", "All fields are required.");
-      return;
-    }
-  
-    axios.post(API.USER.SIGNUP, {
-      name: name,
-      email: email,
-      password: pass,
-    })
-    .then(response => {
-      if (response?.status === 200 && response?.data?.message === "Sign Up successful.") {
-        AsyncStorage.setItem("user", JSON.stringify(response?.data))
-          .then(() => {
-            Alert.alert("Success", "Sign Up Successful");
-            navigation.navigate("Bio");
-          })
-          .catch(error => {
-            console.error("AsyncStorage Error:", error);
-            Alert.alert("Error", "Failed to save user data. Please try again.");
-          });
-      } else {
-        Alert.alert("Error", response?.data?.message || "Sign Up failed");
+  const handleSignUp = async () => {
+    try {
+      if (!name.trim() || !email.trim() || !pass.trim()) {
+        Alert.alert('Error', 'All fields are required.');
+        return;
       }
-    })
-    .catch(error => {
+
+      let res = await axios.post(API.USER.SIGNUP, {
+        name: name,
+        email: email,
+        password: pass,
+      });
+      setUserInstance(res?.data);
+      await AsyncStorage.setItem('user', JSON.stringify(res?.data));
+      Alert.alert('Sign Up successful.');
+      navigation?.navigate('Bio');
+    } catch (error) {
+      console.log(error);
       if (error.response) {
         // Server responded with a status other than 200 range
         const status = error.response.status;
-        const message = error.response.data.message || error.response.data.message;
-  
+        const message =
+          error.response.data.message || error.response.data.message;
+
         if (status === 400) {
-          Alert.alert("Error", "Bad request! All fields are required.");
+          Alert.alert('Error', 'Bad request! All fields are required.');
         } else if (status === 409) {
-          Alert.alert("Error", "User already exists with this email.");
+          Alert.alert('Error', 'User already exists with this email.');
         } else {
-          Alert.alert("Error", message || "Sign Up failed");
+          Alert.alert('Error', message || 'Sign Up failed');
         }
       } else if (error.request) {
         // Request was made but no response was received
-        console.error("Sign Up Error: No response received", error.request);
-        Alert.alert("Error", "No response from server. Please try again later.");
+        console.error('Sign Up Error: No response received', error.request);
+        Alert.alert(
+          'Error',
+          'No response from server. Please try again later.',
+        );
       } else {
         // Something else happened while setting up the request
-        console.error("Sign Up Error:", error.message);
-        Alert.alert("Error", "An error occurred during sign up. Please try again.");
+        console.error('Sign Up Error:', error.message);
+        Alert.alert(
+          'Error',
+          'An error occurred during sign up. Please try again.',
+        );
       }
-    });
+    }
   };
 
   return (
@@ -263,12 +260,11 @@ const Signup = ({navigation}) => {
               alignSelf: 'center',
             }}>
             <TouchableOpacity
-            onPress={()=>{
+              onPress={() => {
                 // navigation.navigate("Bio")
-                pass === cpass ?
-                handleSignUp() : alert("Wrong")
-            }}
-              disabled={email && pass && name && cpass  ? false : true}
+                pass === cpass ? handleSignUp() : alert('Wrong');
+              }}
+              disabled={email && pass && name && cpass ? false : true}
               style={{
                 backgroundColor:
                   email && pass && name && cpass ? '#33E0CF' : '#F3F6F6',
@@ -280,8 +276,7 @@ const Signup = ({navigation}) => {
               }}>
               <Text
                 style={{
-                  color:
-                    email && pass && name && cpass  ? '#FFF' : '#797C7B',
+                  color: email && pass && name && cpass ? '#FFF' : '#797C7B',
                   fontSize: 25,
                   fontFamily: 'ABeeZee-Italic',
                 }}>

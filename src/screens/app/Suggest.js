@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,54 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {Back, Mag} from '../../assets/Images';
 import {Chat_Da, Sugg} from '../Dummy';
+import axios from 'axios';
+import { API } from '../Api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const {height, width} = Dimensions.get('window');
 
 const Suggestion = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
+const [dToken,setDToken]=useState()
+const [uData,setUData]=useState()
+  useEffect(() => {
+
+    
+
+    const fetchData = async () => {
+      try {
+        const data = await AsyncStorage.getItem('user');
+        if (data) {
+          const parsedData = JSON.parse(data);
+          const token = parsedData.token;
+        // console.log("first",token)
+          setDToken(token)
+          get_Suggestions()
+        } else {
+          console.log("No data found");
+        }
+      } catch (error) {
+        console.error("Error retrieving data", error);
+      }
+    };
+
+    fetchData();
+
+    
+  }, [dToken]);
+
+const get_Suggestions = async()=>{
+  const res = await axios.get(API.USER.SUGGES,{headers:{
+    Authorization:dToken
+  }}).then(res=>{
+    // console.log("data",res?.data?.suggestions)
+setUData(res?.data?.suggestions)
+
+  }).catch(error=>{
+    console.log("error",error)
+  })
+}
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
       <ScrollView>
@@ -77,7 +120,8 @@ const Suggestion = ({navigation}) => {
               marginTop: 20,
             }}>
             <FlatList
-              data={Sugg}
+
+              data={uData}
               renderItem={({item, index}) => {
                 return (
                   <View
@@ -95,7 +139,7 @@ const Suggestion = ({navigation}) => {
                         alignItems: 'center',
                       }}>
                       <Image
-                        source={item.pic}
+                        source={require("../../assets/Images/Icons/Sugp.png")}
                         style={{
                           height: 50,
                           width: 50,
@@ -110,13 +154,13 @@ const Suggestion = ({navigation}) => {
                           marginLeft: 20,
                           width: width * 0.4,
                         }}>
-                        {item.name}
+                        {item?.user?.name}
                       </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => {
                         index == 0
-                          ? navigation.navigate('Chat_Sen')
+                          ? navigation.navigate('Chat_Sen',{userdata:item?.user?._id})
                           : setModalVisible(true);
                       }}
                       style={{

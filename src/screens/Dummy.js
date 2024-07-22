@@ -162,3 +162,61 @@ export const Sugg = [
     name: 'Ali Raza',
   },
 ];
+ 
+export const Dummymessages = [
+  {
+    "_id": "1",
+    "content": "Hello",
+    "date": "2024-07-22T17:44:46.288Z",
+    "sender": "1"
+  },
+  {
+    "_id": "2",
+    "content": "How are you?",
+    "date": "2024-07-22T17:45:10.123Z",
+    "sender": "2"
+  },
+  {
+    "_id": "3",
+    "content": "I'm fine, thanks!",
+    "date": "2024-07-22T17:46:00.456Z",
+    "sender": "1"
+  },
+  {
+    "_id": "4",
+    "content": "What about you?",
+    "date": "2024-07-22T17:46:30.789Z",
+    "sender": "1"
+  },
+  {
+    "_id": "5",
+    "content": "I'm doing well.",
+    "date": "2024-07-22T17:47:15.678Z",
+    "sender": "2"
+  },
+  {
+    "_id": "6",
+    "content": "That's good to hear.",
+    "date": "2024-07-22T17:48:00.111Z",
+    "sender": "1"
+  },
+  {
+    "_id": "7",
+    "content": "Have you completed the project?",
+    "date": "2024-07-22T17:49:00.222Z",
+    "sender": "2"
+  },
+  {
+    "_id": "8",
+    "content": "Yes, I have. I'll send it to you shortly.",
+    "date": "2024-07-22T17:50:00.333Z",
+    "sender": "1"
+  },
+  {
+    "_id": "9",
+    "content": "Great! Looking forward to it.",
+    "date": "2024-07-22T17:51:00.444Z",
+    "sender": "2"
+  }
+]
+

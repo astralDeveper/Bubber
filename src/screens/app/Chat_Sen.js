@@ -1,27 +1,108 @@
-import React, {useState} from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  FlatList,
   Dimensions,
-  Image,
   TextInput,
   Modal,
   StyleSheet,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
-import {Back, Cam, Clip, Mag} from '../../assets/Images';
-import {Chat_Da} from '../Dummy';
+import { Back, Clip, Send } from '../../assets/Images';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SocketContext, SocketInstance } from '../../context/SocketContext';
+import axios from 'axios';
+import { BASE_URL } from '../Api';
 
-const Chat_Sen = ({navigation}) => {
+const Chat_Sen = ({ navigation, route }) => {
+  const { socketInstance, userInstance } = useContext(SocketContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [req, setReq] = useState(false);
+  const { userdata } = route.params;
+  const [message, setMessage] = useState('');
+  const [chat, setChat] = useState([]);
+  const [udata, setuData] = useState();
+  const [uToken, setUToken] = useState();
+  const [socket, setSocket] = useState(null);
+  const [conversation, setConversation] = useState(null);
+
+  console.log('chat ', userInstance);
+
+  const getConversation = async () => {
+    try {
+      let rawUser = await AsyncStorage.getItem('user');
+      let user = await JSON.parse(rawUser);
+      let res = await axios.get(
+        `${BASE_URL}/auth/get-conversation/${userdata}`,
+        { headers: { Authorization: user.token } },
+      );
+      setConversation(res?.data?.conversation);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const scrollViewRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollViewRef.current && conversation) {
+      scrollViewRef.current.scrollToEnd({ animated: false });
+    }
+  }, [conversation]);
+
+  useEffect(() => {
+    const handleNewMessage = (data) => {
+      console.log('New message received:', data);
+      setConversation((prev) => ({
+        ...prev,
+        messages: [...prev?.messages, data],
+      }));
+    };
+
+    const handleDeliveredMessage = (data) => {
+      setConversation((prev) => ({
+        ...prev,
+        messages: [...prev?.messages, data],
+      }));
+    };
+
+    SocketInstance?.on('new-message', handleNewMessage);
+    SocketInstance?.on('message-delivered', handleDeliveredMessage);
+
+    return () => {
+      SocketInstance?.off('new-message', handleNewMessage);
+      SocketInstance?.off('message-delivered', handleDeliveredMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!conversation) {
+      getConversation();
+    }
+  }, []);
+
+  const sendMessage = () => {
+    try {
+      if (!socketInstance) {
+        return;
+      }
+
+      socketInstance.emit('send-message', {
+        from: userInstance?.user?._id,
+        to: userdata,
+        message,
+      });
+      setMessage('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
-      <View style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
+      <View style={{ flex: 1 }}>
         <View
           style={{
             flexDirection: 'row',
@@ -30,62 +111,20 @@ const Chat_Sen = ({navigation}) => {
             padding: 20,
             backgroundColor: '#3EC8BF',
             paddingVertical: 40,
-          }}>
-          <TouchableOpacity
-           onPress={() => {
-            navigation.pop()
           }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              navigation.pop();
+            }}
             style={{
               width: width * 0.05,
-            }}>
+            }}
+          >
             <Back />
           </TouchableOpacity>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <Image
-              source={
-                req
-                  ? require('../../assets/Images/Icons/Ch1.png')
-                  : require('../../assets/Images/Icons/Sugp.png')
-              }
-              style={{
-                height: 50,
-                width: 50,
-                borderRadius: 100,
-              }}
-            />
-            <View
-              style={{
-                marginLeft: 10,
-              }}>
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{
-                  fontSize: 18,
-                  color: '#000',
-                  fontFamily: 'ABeeZee-Italic',
-                }}>
-                Jhon Abraham
-              </Text>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#797C7B',
-                  fontFamily: 'ABeeZee-Regular',
-                }}>
-                Active now
-              </Text>
-            </View>
-          </View>
           {req ? (
-            <View
-              style={{
-                width: 10,
-              }}></View>
+            <View style={{ width: 10 }}></View>
           ) : (
             <TouchableOpacity
               onPress={() => {
@@ -95,112 +134,66 @@ const Chat_Sen = ({navigation}) => {
                 backgroundColor: '#FFF',
                 padding: 5,
                 borderRadius: 10,
-              }}>
-              <Text
-                style={{
-                  color: '#3EC8BF',
-                  fontSize: 15,
-                }}>
+              }}
+            >
+              <Text style={{ color: '#3EC8BF', fontSize: 15 }}>
                 Profile Request
               </Text>
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView>
-          <View
-            style={{
-              // marginTop: 30,
-              backgroundColor: '#FFF',
-              // height: height * 0.85,
-            }}>
+        <ScrollView ref={scrollViewRef}>
+          {conversation?.messages.map((item, index) => (
             <View
+              key={index}
               style={{
-                backgroundColor: '#797C7B',
-                padding: 5,
-                borderRadius: 10,
-                alignSelf: 'center',
-                marginTop: 5,
-              }}>
+                backgroundColor: '#FFF',
+                gap: 5,
+                paddingHorizontal: 20,
+                marginVertical: 10,
+                maxWidth: '80%',
+                padding: 8,
+                backgroundColor:
+                  item?.sender === userInstance?.user?._id
+                    ? '#20A090'
+                    : '#F2F7FB',
+                alignSelf:
+                  item?.sender === userInstance?.user?._id
+                    ? 'flex-end'
+                    : 'flex-start',
+                paddingLeft: 10,
+                borderTopRightRadius:
+                  item?.sender === userInstance?.user?._id ? 0 : 10,
+                borderBottomLeftRadius: 10,
+                borderBottomRightRadius: 10,
+                borderTopLeftRadius:
+                  item?.sender === userInstance?.user?._id ? 10 : 0,
+                margin: 10,
+              }}
+            >
               <Text
                 style={{
-                  color: '#FFF',
-                }}>
-                Today
+                  fontSize: 15,
+                  color:
+                    item?.sender === userInstance?.user?._id ? '#FFF' : '#000',
+                }}
+              >
+                {item?.content}
               </Text>
-            </View>
-            <View
-              style={{
-                backgroundColor: '#20A090',
-                padding: 10,
-                alignSelf: 'flex-end',
-                marginRight: 20,
-                marginTop: 20,
-                borderTopLeftRadius: 15,
-                borderBottomLeftRadius: 15,
-                borderBottomRightRadius: 15,
-              }}>
               <Text
                 style={{
-                  color: '#FFF',
-                  fontSize: 18,
-                }}>
-                Hello! Jhon abraham
+                  fontSize: 10,
+                  position: 'absolute',
+                  alignSelf: 'flex-end',
+                  bottom: -12,
+                  right: 10,
+                  fontFamily: 'Actor-Regular',
+                }}
+              >
+                10:57 AM
               </Text>
             </View>
-            <View
-              style={{
-                // backgroundColor: '#20A090',
-                // padding: 10,
-                alignSelf: 'flex-end',
-                marginRight: 40,
-                marginTop: 5,
-              }}>
-              <Text
-                style={{
-                  color: '#797C7B',
-                  fontSize: 12,
-                  fontFamily: 'ABeeZee-Italic',
-                }}>
-                09:25 AM
-              </Text>
-            </View>
-            <View
-              style={{
-                backgroundColor: '#F2F7FB',
-                padding: 10,
-                alignSelf: 'flex-start',
-                marginLeft: 20,
-                marginTop: 20,
-                borderTopRightRadius: 15,
-                borderBottomLeftRadius: 15,
-                borderBottomRightRadius: 15,
-              }}>
-              <Text
-                style={{
-                  color: '#000',
-                  fontSize: 18,
-                }}>
-                Hello ! Nazrul How are you?
-              </Text>
-            </View>
-            <View
-              style={{
-                // backgroundColor: '#20A090',
-                // padding: 10,
-                alignSelf: 'center',
-                // marginRight: 40,
-                marginTop: 5,
-              }}>
-              <Text
-                style={{
-                  color: '#797C7B',
-                  fontSize: 12,
-                  fontFamily: 'ABeeZee-Italic',
-                }}>
-                09:25 AM
-              </Text>
-            </View>
-          </View>
+          ))}
         </ScrollView>
       </View>
       <View
@@ -209,7 +202,6 @@ const Chat_Sen = ({navigation}) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           paddingHorizontal: 15,
-          position: 'absolute',
           bottom: 10,
           backgroundColor: '#FFF',
           padding: 10,
@@ -217,14 +209,16 @@ const Chat_Sen = ({navigation}) => {
           borderTopWidth: 1,
           paddingVertical: 15,
           borderColor: '#EEFAF8',
-        }}>
+        }}
+      >
         <TextInput
           placeholder="Write your message"
           placeholderTextColor={'#797C7B'}
+          value={message}
+          onChangeText={setMessage}
           style={{
             backgroundColor: '#F3F6F6',
             color: '#000',
-            // paddingHorizontal: 10,
             borderRadius: 15,
             width: width * 0.7,
           }}
@@ -232,8 +226,8 @@ const Chat_Sen = ({navigation}) => {
         <TouchableOpacity>
           <Clip />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Cam />
+        <TouchableOpacity onPress={sendMessage}>
+          <Send />
         </TouchableOpacity>
       </View>
       <Modal transparent={true} visible={modalVisible} animationType="slide">
@@ -242,7 +236,8 @@ const Chat_Sen = ({navigation}) => {
           onPress={() => {
             setModalVisible(false);
           }}
-          style={styles.modalBackground}>
+          style={styles.modalBackground}
+        >
           <View style={styles.modalContainer}>
             <Text
               style={{
@@ -250,7 +245,8 @@ const Chat_Sen = ({navigation}) => {
                 fontSize: 16,
                 fontFamily: 'ABeeZee-Italic',
                 alignSelf: 'center',
-              }}>
+              }}
+            >
               Profile Request Received
             </Text>
             <Text
@@ -261,15 +257,12 @@ const Chat_Sen = ({navigation}) => {
                 alignSelf: 'center',
                 marginVertical: 20,
                 textAlign: 'center',
-              }}>
+              }}
+            >
               Amina Iqbal has sent you a request to view your profile details,
               including your display picture, name, and more.
             </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-              }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TouchableOpacity
                 onPress={() => {
                   setModalVisible(false);
@@ -280,34 +273,38 @@ const Chat_Sen = ({navigation}) => {
                   width: width * 0.28,
                   alignItems: 'center',
                   borderRadius: 10,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     color: '#000',
                     fontSize: 18,
                     fontFamily: 'ABeeZee-Italic',
-                  }}>
+                  }}
+                >
                   Decline
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-               onPress={() => {
-                setModalVisible(false);
-                setReq(true)
-              }}
+                onPress={() => {
+                  setModalVisible(false);
+                  setReq(true);
+                }}
                 style={{
                   backgroundColor: '#3EC8BF',
                   padding: 8,
                   width: width * 0.28,
                   alignItems: 'center',
                   borderRadius: 10,
-                }}>
+                }}
+              >
                 <Text
                   style={{
                     color: '#FFF',
                     fontSize: 18,
                     fontFamily: 'ABeeZee-Italic',
-                  }}>
+                  }}
+                >
                   Allow
                 </Text>
               </TouchableOpacity>
@@ -318,7 +315,7 @@ const Chat_Sen = ({navigation}) => {
     </SafeAreaView>
   );
 };
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   modalBackground: {
@@ -339,5 +336,5 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 18,
   },
-});
+}); 
 export default Chat_Sen;

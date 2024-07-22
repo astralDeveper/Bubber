@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useContext, useState} from 'react';
 import {Appl, Appl_B, Back_Arrow, Face, Goo} from '../../assets/Images';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
@@ -16,10 +16,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import {API} from '../Api';
 import {useNavigation} from '@react-navigation/native';
+import {SocketContext} from '../../context/SocketContext';
 const Login = () => {
+  const {setUserInstance} = useContext(SocketContext);
   const [email, setEmail] = useState();
   const [pass, setPass] = useState();
   const navigation = useNavigation();
+
   GoogleSignin.configure({
     webClientId:
       '306651826618-uqp44hv9onmjpk93qeq1i5oo0befsc4m.apps.googleusercontent.com',
@@ -111,6 +114,7 @@ const Login = () => {
         console.log(response?.data);
         if (response?.data?.message == 'Login successfull.') {
           // alert("Login Successfull")
+          setUserInstance(response?.data);
           AsyncStorage.setItem('user', JSON.stringify(response?.data));
           navigation.navigate('BottomTabs');
         }

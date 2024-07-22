@@ -1,5 +1,5 @@
 
-const BASE_URL = 'http://192.168.100.12:3000';
+export const BASE_URL = 'http://192.168.100.12:3000';
 
 
 export const API = {
@@ -11,6 +11,8 @@ export const API = {
     Add_Inter: `${BASE_URL}/auth/add-interests`,
     PROFILE_DATA :`${BASE_URL}/auth/get-profile`,
     UPDATE_DATA :`${BASE_URL}/auth/update-profile`,
+    GET_CONVERSATIONS :`${BASE_URL}/auth/get-conversations`,
+    SUGGES:`${BASE_URL}/friend-ship/get-suggestions`
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };
