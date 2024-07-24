@@ -1,14 +1,27 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, {useContext, useEffect, useState} from 'react';
-import {View, StyleSheet, Image, Text, ImageBackground} from 'react-native';
-import {SocketContext} from '../../context/SocketContext';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, StyleSheet, Image, Text, ImageBackground } from 'react-native';
+import { SocketContext } from '../../context/SocketContext';
+import axios from 'axios';
+import { API } from '../Api';
 
-const Splash = ({navigation}) => {
-  const {setUserInstance} = useContext(SocketContext);
+const Splash = ({ navigation }) => {
+  const { setUserInstance, setUserInfo } = useContext(SocketContext);
   const isAuth = async () => {
     const data = await AsyncStorage.getItem('user');
+    const parsedData = JSON.parse(data);
     setTimeout(async () => {
       if (data) {
+        const token = parsedData.token;
+        const res = await axios
+          .get(API.USER.PROFILE_DATA, {
+            headers: {
+              Authorization: token,
+            },
+          })
+          .then(res => {
+            setUserInfo(res.data.user);
+          });
         let user = await JSON.parse(data);
         setUserInstance(user);
         navigation.replace('BottomTabs');

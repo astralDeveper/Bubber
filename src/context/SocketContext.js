@@ -1,13 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {createContext, useEffect, useState} from 'react';
+import { createContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import {BASE_URL} from '../screens/Api';
+import { BASE_URL } from '../screens/Api';
 
 export const SocketContext = createContext();
 export let SocketInstance;
-const SocketContextProvider = ({children}) => {
+const SocketContextProvider = ({ children }) => {
   const [socketInstance, setSocketInstance] = useState(null);
   const [userInstance, setUserInstance] = useState(null);
+  const [userInfo, setUserInfo] = useState({});
+
 
   const initSocket = async user => {
     try {
@@ -16,13 +18,13 @@ const SocketContextProvider = ({children}) => {
       }
 
       const Socket = io(BASE_URL, {
-        query: {token: user?.token},
+        query: { token: user?.token },
       });
 
       setSocketInstance(Socket);
       SocketInstance = Socket;
 
-      Socket.emit('connected', {id: user?.user?._id});
+      Socket.emit('connected', { id: user?.user?._id });
       console.log('Socket connected and initialized');
 
       // Socket.on('disconnect', () => {
@@ -63,7 +65,7 @@ const SocketContextProvider = ({children}) => {
 
   return (
     <SocketContext.Provider
-      value={{socketInstance, setSocketInstance, setUserInstance, userInstance}}>
+      value={{ socketInstance, setSocketInstance, setUserInstance, userInstance, userInfo, setUserInfo }}>
       {children}
     </SocketContext.Provider>
   );

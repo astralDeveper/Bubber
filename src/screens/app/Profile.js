@@ -7,15 +7,18 @@ import {
   TextInput,
   ScrollView,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Back_Arrow, Back_W, Messeg, Pen} from '../../assets/Images';
-import {Image} from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Back_Arrow, Back_W, Messeg, Pen } from '../../assets/Images';
+import { Image } from 'react-native';
 import axios from 'axios';
-import {API} from '../Api';
+import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-picker';
-const Profile = ({navigation}) => {
+import { SocketContext } from '../../context/SocketContext';
+const Profile = ({ navigation }) => {
+  const { userInfo, setUserInfo } = useContext(SocketContext);
+  console.log(userInfo)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,38 +40,14 @@ const Profile = ({navigation}) => {
   }, []);
   const [dToken, setDToken] = useState();
 
-  const [dName, setDName] = useState();
-  const [rName, setRName] = useState();
-  const [email, setEmail] = useState();
-  const [pvide, setpvide] = useState();
-  const [imge, setimge] = useState();
-  const [addd, setaddd] = useState();
-  const [pho, setpho] = useState();
+  const [dName, setDName] = useState(userInfo.name);
+  const [rName, setRName] = useState(userInfo.realName);
+  const [email, setEmail] = useState(userInfo.email);
+  const [pvide, setpvide] = useState(null);
+  const [imge, setimge] = useState(userInfo.image?.path);
+  const [addd, setaddd] = useState(userInfo.address);
+  const [pho, setpho] = useState(userInfo.phone);
 
-  const Fetch_Data = async () => {
-    const res = await axios
-      .get(API.USER.PROFILE_DATA, {
-        headers: {
-          Authorization: dToken,
-        },
-      })
-      .then(res => {
-        // console.log('first', res.data);
-        setDName(res?.data?.user?.displayName);
-        setRName(res?.data?.user?.realName);
-        setEmail(res?.data?.user?.email);
-        setimge(res?.data?.user?.image?.path);
-        setaddd(res?.data?.user?.address);
-        setpho(res?.data?.user?.phone);
-      });
-  };
-
-  // const
-  useEffect(() => {
-    Fetch_Data();
-  }, [dToken]);
-
-  console.log(addd);
 
   const onUpdate = async () => {
     const formData = new FormData();
@@ -94,7 +73,24 @@ const Profile = ({navigation}) => {
       })
       .then(res => {
         console.log(res?.data);
+        setUserInfo(prevUserInfo => ({
+          ...prevUserInfo,
+          "address": addd,
+          "displayName": dName,
+          "email": email,
+          "phone": pho,
+          "realName": rName,
+          ...(pvide && {
+            "image": {
+              "filename": pvide.fileName,
+              "mimetype": pvide.type,
+              "path": pvide.uri
+            }
+          })
+        }));
+
         alert('Data Updated Successfully');
+        navigation.goBack()
       })
       .catch(error => {
         console.log(error);
@@ -156,6 +152,7 @@ const Profile = ({navigation}) => {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else {
         setpvide(response.assets[0]);
+        console.log('response.assets[0]', response.assets[0]);
       }
     });
   };
@@ -177,7 +174,6 @@ const Profile = ({navigation}) => {
   //   console.error('Error uploading file:', error);
   // }
   // };
-
   return (
     <SafeAreaView
       style={{
@@ -211,20 +207,26 @@ const Profile = ({navigation}) => {
               style={{
                 marginVertical: 10,
               }}>
-              <Image
-                source={
-                  imge
-                    ? {uri: imge}
-                    : pvide
-                    ? {uri: pvide?.uri}
-                    : require('../../assets/Images/Icons/Pro.png')
-                }
+              {pvide?.uri ? <Image
+                source={{ uri: pvide.uri }}
                 style={{
                   height: height * 0.15,
                   width: width * 0.31,
                   borderRadius: 100,
                 }}
-              />
+              /> :
+                <Image
+                  source={imge ?
+                    { uri: imge }
+                    : require('../../assets/Images/Icons/Pro.png')
+                  }
+                  style={{
+                    height: height * 0.15,
+                    width: width * 0.31,
+                    borderRadius: 100,
+                  }}
+                />
+              }
             </TouchableOpacity>
             <Text
               style={{
@@ -487,5 +489,5 @@ const Profile = ({navigation}) => {
     </SafeAreaView>
   );
 };
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 export default Profile;

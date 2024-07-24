@@ -1,4 +1,4 @@
-import React, {Fragment, useContext, useEffect, useState} from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,21 +12,19 @@ import {
   Modal,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {Mag} from '../../assets/Images';
-import {Chat_Da} from '../Dummy';
+import { Mag } from '../../assets/Images';
+import { Chat_Da } from '../Dummy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {API} from '../Api';
-import {SocketContext} from '../../context/SocketContext';
-import {timeAgo} from '../../libs/timeAgo';
+import { API } from '../Api';
+import { SocketContext } from '../../context/SocketContext';
+import { timeAgo } from '../../libs/timeAgo';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
-const Message = ({navigation}) => {
+const Message = ({ navigation }) => {
   const [conData, setConData] = useState();
-  const [pIma, setPIma] = useState();
-  const {userInstance} = useContext(SocketContext);
-  // console.log("Hello",userInstance)
+  const { userInstance, userInfo } = useContext(SocketContext);
 
   const Get_cons = async () => {
     try {
@@ -41,26 +39,10 @@ const Message = ({navigation}) => {
       console.log('error', error);
     }
   };
-  const GetPic = async () => {
-    try {
-      const res = await axios.get(API.USER.PROFILE_DATA, {
-        headers: {
-          Authorization: userInstance?.token,
-        },
-      });
-      console.log('firstsdfgsdg', res?.data?.user?.image?.path);
-      setPIma(res?.data?.user?.image?.path);
-    } catch (error) {
-      console.log('error', error);
-    }
-  };
-  useEffect(() => {
 
-    GetPic();
-  }, [pIma]);
   useEffect(() => {
     Get_cons();
-  }, [conData]);
+  }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -72,9 +54,9 @@ const Message = ({navigation}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#3EC8BF'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3EC8BF' }}>
       <ScrollView>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -106,10 +88,9 @@ const Message = ({navigation}) => {
                 navigation.navigate('Profile');
               }}>
               <Image
-                source={
-                  pIma
-                    ? {uri: pIma}
-                    : require('../../assets/Images/Icons/Pro.png')
+                source={userInfo.image?.path ?
+                  { uri: userInfo.image.path }
+                  : require('../../assets/Images/Icons/Pro.png')
                 }
                 style={{
                   height: 50,
@@ -129,13 +110,13 @@ const Message = ({navigation}) => {
             }}>
             <FlatList
               data={conData}
-              renderItem={({item, index}) => (
+              renderItem={({ item, index }) => (
                 <Fragment key={index}>
                   {item?.participants?.map((user, userIndex) => (
                     <Fragment key={userIndex}>
                       {user?._id !== userInstance?.user?._id ? (
                         <View
-                          style={{backgroundColor: 'rgba(255,255,255,0.8)'}}>
+                          style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
                           <TouchableOpacity
                             onPress={() => {
                               index == 0 &&
@@ -159,7 +140,7 @@ const Message = ({navigation}) => {
                                 justifyContent: 'space-between',
                               }}>
                               <Image
-                                source={{uri: user?.image?.path}}
+                                source={{ uri: user?.image?.path }}
                                 style={{
                                   height: 60,
                                   width: 60,
@@ -239,7 +220,7 @@ const Message = ({navigation}) => {
                   ))}
                 </Fragment>
               )}
-              // keyExtractor={item => item.id.toString()}
+            // keyExtractor={item => item.id.toString()}
             />
           </View>
         </View>

@@ -70,13 +70,14 @@ const Suggestion = ({navigation}) => {
   };
 
   const handleItemPress = (index,item) => {
-    if (selectedIndex !== null && selectedIndex !== index) {
-      setPendingIndex(index);
-      setModalVisible(true);
-    } else {
-      setSelectedIndex(index);
-      navigation.navigate('Chat_Sen', {userdata: item?.user?._id});
-    }
+    console.log(item.user._id)
+    // if (selectedIndex !== null && selectedIndex !== index) {
+    //   setPendingIndex(index);
+    //   setModalVisible(true);
+    // } else {
+    //   setSelectedIndex(index);
+    //   navigation.navigate('Chat_Sen', {userdata: item?.user?._id});
+    // }
   };
 
   const handleModalConfirm = () => {
