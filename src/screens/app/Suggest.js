@@ -72,7 +72,6 @@ const Suggestion = ({ navigation }) => {
   };
 
   const handleItemPress = async (index, item) => {
-    console.log('item',item?.user)
     const id = await AsyncStorage.getItem('ChatID')
     if (id == null || id != item.user._id) {
       setpendingChatID(item.user._id);

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import axios from 'axios';
 import { API } from '../Api';
 import { SocketContext } from '../../context/SocketContext';
 import { timeAgo } from '../../libs/timeAgo';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('window');
 
@@ -33,18 +34,24 @@ const Message = ({ navigation }) => {
           Authorization: userInstance?.token,
         },
       });
-      // console.log("first",res?.data?.conversations[0]?.participants)
-      console.log(res?.data?.conversations)
-      setConData(res?.data?.conversations);
+
+      if (res?.data?.conversations) {
+        const sortedByLastMessageTimestamp = res.data.conversations.sort((a, b) => {
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        });
+        setConData(sortedByLastMessageTimestamp);
+      }
     } catch (error) {
       console.log('error', error);
     }
   };
 
-  useEffect(() => {
-    Get_cons();
-  }, []);
-  console.log(conData[0]?.participants)
+  useFocusEffect(
+    useCallback(() => {
+      Get_cons();
+    }, [])
+  );
+
   const [modalVisible, setModalVisible] = useState(false);
 
   let getLatestMessage = messages => {
@@ -53,7 +60,6 @@ const Message = ({ navigation }) => {
     });
     return latestMessage;
   };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#3EC8BF' }}>
       <ScrollView>
@@ -109,120 +115,65 @@ const Message = ({ navigation }) => {
               borderTopLeftRadius: 40,
               height: height * 0.9,
             }}>
-            <FlatList
-              data={conData?.participants}
-              renderItem={({ item, index }) => (
-                <Fragment key={index}>
-                  {item?.participants?.map((user, userIndex) => (
-                    <Fragment key={userIndex}>
-                      {user?._id !== userInstance?.user?._id ? (
-                        <View
-                          style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
-                          <TouchableOpacity
-                            onPress={() => {
-                              index == 0 &&
-                                navigation.navigate('Chat_Sen', {
-                                  userdata: user,
-                                });
-                            }}
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              width: width * 0.9,
-                              alignSelf: 'center',
-                              marginVertical: 10,
-                            }}>
-                            <View
-                              style={{
-                                flexDirection: 'row',
-                                width: width * 0.71,
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                              }}>
-                              <Image
-                                source={{ uri: user?.image?.path }}
-                                style={{
-                                  height: 60,
-                                  width: 60,
-                                  borderRadius: 100,
-                                }}
-                              />
-                              <View>
-                                <Text
-                                  numberOfLines={1}
-                                  ellipsizeMode={'tail'}
-                                  style={{
-                                    color: '#000',
-                                    fontSize: 20,
-                                    fontFamily: 'ABeeZee-Italic',
-                                    width: width * 0.4,
-                                  }}>
-                                  {user?.name}
-                                </Text>
-                                {/* <Text
-                                  numberOfLines={1}
-                                  ellipsizeMode={'tail'}
-                                  style={{
-                                    color: '#797C7B',
-                                    fontSize: 12,
-                                    fontFamily: 'ABeeZee-Regular',
-                                    width: width * 0.5,
-                                  }}>
-                                  {getLatestMessage(item?.messages)?.content}
-                                </Text> */}
-                              </View>
-                            </View>
-                            <View>
-                              {/* <Text
-                                style={{
-                                  color: '#797C7B',
-                                  fontSize: 12,
-                                  fontFamily: 'ABeeZee-Regular',
-                                  width: width * 0.18,
-                                }}>
-                                  {timeAgo(getLatestMessage(item?.messages)?.date)}
-                              </Text> */}
-                            </View>
-                          </TouchableOpacity>
 
-                          {/* {index == 0 ? null : (
-                            <TouchableOpacity
-                              onPress={() => {
-                                setModalVisible(true);
-                              }}
-                              activeOpacity={1}
+            {conData?.map((item, userIndex) => (
+              item.participants.map((user, index) => (
+                <Fragment key={index}>
+                  {user?._id !== userInstance?.user?._id ? (
+                    <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (userIndex == 0) {
+                            navigation.navigate('Chat_Sen', {
+                              userdata: user,
+                            });
+                          } else setModalVisible(true)
+                        }}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          width: width * 0.9,
+                          alignSelf: 'center',
+                          marginVertical: 10,
+                        }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            width: width * 0.71,
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}>
+                          {/* <Image
+                          // source={{ uri: user?.image?.path }}
+                          style={{
+                            height: 60,
+                            width: 60,
+                            borderRadius: 100,
+                          }}
+                        /> */}
+                          <View>
+                            <Text
+                              numberOfLines={1}
+                              ellipsizeMode={'tail'}
                               style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
+                                color: '#000',
+                                fontSize: 20,
+                                fontFamily: 'ABeeZee-Italic',
+                                width: width * 0.4,
                               }}>
-                              <LinearGradient
-                                colors={[
-                                  'rgba(255, 255, 255, 0.9)',
-                                  'rgba(255, 255, 255, 0.9)',
-                                  'rgba(255, 255, 255, 0.9)',
-                                ]}
-                                style={{
-                                  // flex: 1,
-                                  height: height * 0.1,
-                                  width: width,
-                                }}
-                              />
-                            </TouchableOpacity>
-                          )} */}
+                              {user?.name}
+                            </Text>
+                          </View>
                         </View>
-                      ) : (
-                        <></>
-                      )}
-                    </Fragment>
-                  ))}
-                </Fragment>
-              )}
-            // keyExtractor={item => item.id.toString()}
-            />
+                        <View></View>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <></>
+                  )}
+                </Fragment>))
+            ))}
           </View>
         </View>
       </ScrollView>

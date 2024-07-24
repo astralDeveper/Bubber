@@ -26,7 +26,6 @@ const Chat_Sen = ({ navigation, route }) => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
-
   // Fetch conversation when component mounts or userdata changes
   useEffect(() => {
     const getConversation = async () => {
@@ -112,7 +111,7 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
-            <Text style={styles.displayNameText}>{userdata.name}</Text>
+            <Text style={styles.displayNameText}>{userdata?.displayName}</Text>
           </View>
           {!req && (
             <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.profileRequestButton}>
