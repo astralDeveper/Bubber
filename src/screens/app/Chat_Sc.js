@@ -34,6 +34,7 @@ const Message = ({ navigation }) => {
         },
       });
       // console.log("first",res?.data?.conversations[0]?.participants)
+      console.log(res?.data?.conversations)
       setConData(res?.data?.conversations);
     } catch (error) {
       console.log('error', error);
@@ -43,7 +44,7 @@ const Message = ({ navigation }) => {
   useEffect(() => {
     Get_cons();
   }, []);
-
+  console.log(conData[0]?.participants)
   const [modalVisible, setModalVisible] = useState(false);
 
   let getLatestMessage = messages => {
@@ -109,7 +110,7 @@ const Message = ({ navigation }) => {
               height: height * 0.9,
             }}>
             <FlatList
-              data={conData}
+              data={conData?.participants}
               renderItem={({ item, index }) => (
                 <Fragment key={index}>
                   {item?.participants?.map((user, userIndex) => (
@@ -121,7 +122,7 @@ const Message = ({ navigation }) => {
                             onPress={() => {
                               index == 0 &&
                                 navigation.navigate('Chat_Sen', {
-                                  userdata: user?._id,
+                                  userdata: user,
                                 });
                             }}
                             style={{

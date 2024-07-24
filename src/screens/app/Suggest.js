@@ -1,5 +1,5 @@
 // onPress={() => {
-//   // setSelectedIndex(index);
+//   // setSelectedChatID(index);
 //   handleItemPress(index)
 //   //  await   AsyncStorage.setItem("ID",item?.user?._id)
 
@@ -10,7 +10,7 @@
 //   // }
 // }}
 
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -25,21 +25,23 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API} from '../Api';
+import { API } from '../Api';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
-const Suggestion = ({navigation}) => {
+const Suggestion = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [dToken, setDToken] = useState();
   const [uData, setUData] = useState();
-  const [selectedIndex, setSelectedIndex] = useState(null);
-  const [pendingIndex, setPendingIndex] = useState(null);
-
+  const [selectedChatID, setSelectedChatID] = useState(null);
+  const [pendingChatID, setpendingChatID] = useState(null);
+  const [chatUserData, setChatUserData] = useState();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await AsyncStorage.getItem('user');
+        const chatID = await AsyncStorage.getItem('ChatID');
+        setSelectedChatID(chatID)
         if (data) {
           const parsedData = JSON.parse(data);
           const token = parsedData.token;
@@ -69,32 +71,36 @@ const Suggestion = ({navigation}) => {
     }
   };
 
-  const handleItemPress = (index,item) => {
-    console.log(item.user._id)
-    // if (selectedIndex !== null && selectedIndex !== index) {
-    //   setPendingIndex(index);
-    //   setModalVisible(true);
-    // } else {
-    //   setSelectedIndex(index);
-    //   navigation.navigate('Chat_Sen', {userdata: item?.user?._id});
-    // }
+  const handleItemPress = async (index, item) => {
+    console.log('item',item?.user)
+    const id = await AsyncStorage.getItem('ChatID')
+    if (id == null || id != item.user._id) {
+      setpendingChatID(item.user._id);
+      setChatUserData(item.user)
+      setModalVisible(true);
+    } else if (id == item.user._id) {
+      setSelectedChatID(item.user._id);
+      navigation.navigate('Chat_Sen', { userdata: item?.user });
+    };
   };
 
-  const handleModalConfirm = () => {
-    setSelectedIndex(pendingIndex);
+  const handleModalConfirm = async () => {
+    if (pendingChatID) await AsyncStorage.setItem('ChatID', pendingChatID)
+    setSelectedChatID(pendingChatID);
     setModalVisible(false);
-    setPendingIndex(null);
+    setpendingChatID(null);
+    navigation.navigate('Chat_Sen', { userdata: chatUserData });
   };
 
   const handleModalCancel = () => {
     setModalVisible(false);
-    setPendingIndex(null);
+    setpendingChatID(null);
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF' }}>
       <ScrollView>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton}>
               {/* <Back /> */}
@@ -114,10 +120,10 @@ const Suggestion = ({navigation}) => {
           <View style={styles.listContainer}>
             <FlatList
               data={uData}
-              renderItem={({item, index}) => {
+              renderItem={({ item, index }) => {
                 const isDisabled =
-                  selectedIndex !== null && selectedIndex !== index;
-                return (
+                  selectedChatID != item.user._id ? true : false;
+                return (isDisabled &&
                   <View style={styles.listItem}>
                     <View style={styles.userInfo}>
                       <Image
@@ -136,10 +142,7 @@ const Suggestion = ({navigation}) => {
                         handleItemPress(index, item);
                       }}
                       // disabled={isDisabled}
-                      style={[
-                        styles.chatButton,
-                        isDisabled && styles.disabledChatButton,
-                      ]}>
+                      style={styles.chatButton}>
                       <Text style={styles.chatButtonText}>Chat</Text>
                     </TouchableOpacity>
                   </View>

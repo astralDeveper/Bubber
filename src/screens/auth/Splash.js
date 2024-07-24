@@ -13,6 +13,7 @@ const Splash = ({ navigation }) => {
     setTimeout(async () => {
       if (data) {
         const token = parsedData.token;
+        console.log(token)
         const res = await axios
           .get(API.USER.PROFILE_DATA, {
             headers: {
@@ -29,7 +30,7 @@ const Splash = ({ navigation }) => {
       } else {
         navigation.replace('Welcome');
       }
-    }, 3000);
+    }, 2000);
   };
   useEffect(() => {
     isAuth();

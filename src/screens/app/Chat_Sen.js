@@ -25,7 +25,6 @@ const Chat_Sen = ({ navigation, route }) => {
   const { userdata } = route.params;
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState(null);
-
   const scrollViewRef = useRef(null);
 
   // Fetch conversation when component mounts or userdata changes
@@ -35,7 +34,7 @@ const Chat_Sen = ({ navigation, route }) => {
         const rawUser = await AsyncStorage.getItem('user');
         const user = JSON.parse(rawUser);
         if (user && user.token) {
-          const res = await axios.get(`${BASE_URL}/auth/get-conversation/${userdata}`, {
+          const res = await axios.get(`${BASE_URL}/auth/get-conversation/${userdata._id}`, {
             headers: { Authorization: user.token },
           });
           setConversation(res?.data?.conversation || {});
@@ -105,9 +104,16 @@ const Chat_Sen = ({ navigation, route }) => {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.pop()} style={styles.backButton}>
-            <Back />
-          </TouchableOpacity>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10
+          }}>
+            <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
+              <Back />
+            </TouchableOpacity>
+            <Text style={styles.displayNameText}>{userdata.name}</Text>
+          </View>
           {!req && (
             <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.profileRequestButton}>
               <Text style={styles.profileRequestText}>Profile Request</Text>
@@ -217,6 +223,10 @@ const styles = StyleSheet.create({
   profileRequestText: {
     color: '#3EC8BF',
     fontSize: 15,
+  },
+  displayNameText: {
+    color: '#FFF',
+    fontSize: 20,
   },
   messageBubble: {
     gap: 5,
