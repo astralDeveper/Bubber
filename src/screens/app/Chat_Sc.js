@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {Fragment, useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -16,55 +16,61 @@ import {Mag} from '../../assets/Images';
 import {Chat_Da} from '../Dummy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API } from '../Api';
+import {API} from '../Api';
+import {SocketContext} from '../../context/SocketContext';
+import {timeAgo} from '../../libs/timeAgo';
 
 const {height, width} = Dimensions.get('window');
 
 const Message = ({navigation}) => {
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AsyncStorage.getItem('user');
-        if (data) {
-          const parsedData = JSON.parse(data);
-          const token = parsedData.token;
+  const [conData, setConData] = useState();
+  const [pIma, setPIma] = useState();
+  const {userInstance} = useContext(SocketContext);
+  // console.log("Hello",userInstance)
 
-          setDToken(token);
-        } else {
-          console.log('No data found');
-        }
-      } catch (error) {
-        console.error('Error retrieving data', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-  const [dToken, setDToken] = useState();
-
-
-  const [imge, setimge] = useState();
- 
-
-  const Fetch_Data = async () => {
-    const res = await axios
-      .get(API.USER.PROFILE_DATA, {
+  const Get_cons = async () => {
+    try {
+      const res = await axios.get(API.USER.GET_CONVERSATIONS, {
         headers: {
-          Authorization: dToken,
+          Authorization: userInstance?.token,
         },
-      })
-      .then(res => {
-        console.log('first', res.data);
-      
-        setimge(res?.data?.user?.image?.path);
-      
       });
+      // console.log("first",res?.data?.conversations[0]?.participants)
+      setConData(res?.data?.conversations);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+  const GetPic = async () => {
+    try {
+      const res = await axios.get(API.USER.PROFILE_DATA, {
+        headers: {
+          Authorization: userInstance?.token,
+        },
+      });
+      console.log('firstsdfgsdg', res?.data?.user?.image?.path);
+      setPIma(res?.data?.user?.image?.path);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+  useEffect(() => {
+
+    GetPic();
+  }, [pIma]);
+  useEffect(() => {
+    Get_cons();
+  }, [conData]);
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  let getLatestMessage = messages => {
+    let latestMessage = messages.reduce((latest, message) => {
+      return latest.date > message.date ? latest : message;
+    });
+    return latestMessage;
   };
 
-  useEffect(() => {
-    Fetch_Data();
-  }, [dToken]);
-  const [modalVisible, setModalVisible] = useState(false);
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#3EC8BF'}}>
       <ScrollView>
@@ -76,7 +82,7 @@ const Message = ({navigation}) => {
               justifyContent: 'space-between',
               margin: 20,
             }}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={{
                 backgroundColor: '#000',
                 height: 50,
@@ -86,7 +92,7 @@ const Message = ({navigation}) => {
                 borderRadius: 100,
               }}>
               <Mag />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <Text
               style={{
                 fontSize: 25,
@@ -101,8 +107,10 @@ const Message = ({navigation}) => {
               }}>
               <Image
                 source={
-                  imge ? {uri:imge}:
-                  require('../../assets/Images/Icons/Pro.png')}
+                  pIma
+                    ? {uri: pIma}
+                    : require('../../assets/Images/Icons/Pro.png')
+                }
                 style={{
                   height: 50,
                   width: 50,
@@ -117,106 +125,121 @@ const Message = ({navigation}) => {
               backgroundColor: '#FFFFFF',
               borderTopRightRadius: 40,
               borderTopLeftRadius: 40,
+              height: height * 0.9,
             }}>
             <FlatList
-              data={Chat_Da}
+              data={conData}
               renderItem={({item, index}) => (
-                <View style={{backgroundColor: 'rgba(255,255,255,0.8)'}}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      index == 0 && navigation.navigate('Chat_Sen');
-                    }}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      width: width * 0.9,
-                      alignSelf: 'center',
-                      marginVertical: 10,
-                    }}>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        width: width * 0.71,
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                      }}>
-                      <Image
-                        source={item.pic}
-                        style={{
-                          height: 60,
-                          width: 60,
-                          borderRadius: 100,
-                        }}
-                      />
-                      <View>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode={'tail'}
-                          style={{
-                            color: '#000',
-                            fontSize: 20,
-                            fontFamily: 'ABeeZee-Italic',
-                            width: width * 0.4,
-                          }}>
-                          {item.name}
-                        </Text>
-                        <Text
-                          numberOfLines={1}
-                          ellipsizeMode={'tail'}
-                          style={{
-                            color: '#797C7B',
-                            fontSize: 12,
-                            fontFamily: 'ABeeZee-Regular',
-                            width: width * 0.5,
-                          }}>
-                          {item.Last_M}
-                        </Text>
-                      </View>
-                    </View>
-                    <View>
-                      <Text
-                        style={{
-                          color: '#797C7B',
-                          fontSize: 12,
-                          fontFamily: 'ABeeZee-Regular',
-                          width: width * 0.18,
-                        }}>
-                        {item.time}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
+                <Fragment key={index}>
+                  {item?.participants?.map((user, userIndex) => (
+                    <Fragment key={userIndex}>
+                      {user?._id !== userInstance?.user?._id ? (
+                        <View
+                          style={{backgroundColor: 'rgba(255,255,255,0.8)'}}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              index == 0 &&
+                                navigation.navigate('Chat_Sen', {
+                                  userdata: user?._id,
+                                });
+                            }}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              width: width * 0.9,
+                              alignSelf: 'center',
+                              marginVertical: 10,
+                            }}>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                width: width * 0.71,
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                              }}>
+                              <Image
+                                source={{uri: user?.image?.path}}
+                                style={{
+                                  height: 60,
+                                  width: 60,
+                                  borderRadius: 100,
+                                }}
+                              />
+                              <View>
+                                <Text
+                                  numberOfLines={1}
+                                  ellipsizeMode={'tail'}
+                                  style={{
+                                    color: '#000',
+                                    fontSize: 20,
+                                    fontFamily: 'ABeeZee-Italic',
+                                    width: width * 0.4,
+                                  }}>
+                                  {user?.name}
+                                </Text>
+                                {/* <Text
+                                  numberOfLines={1}
+                                  ellipsizeMode={'tail'}
+                                  style={{
+                                    color: '#797C7B',
+                                    fontSize: 12,
+                                    fontFamily: 'ABeeZee-Regular',
+                                    width: width * 0.5,
+                                  }}>
+                                  {getLatestMessage(item?.messages)?.content}
+                                </Text> */}
+                              </View>
+                            </View>
+                            <View>
+                              {/* <Text
+                                style={{
+                                  color: '#797C7B',
+                                  fontSize: 12,
+                                  fontFamily: 'ABeeZee-Regular',
+                                  width: width * 0.18,
+                                }}>
+                                  {timeAgo(getLatestMessage(item?.messages)?.date)}
+                              </Text> */}
+                            </View>
+                          </TouchableOpacity>
 
-                  {index == 0 ? null : (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setModalVisible(true);
-                      }}
-                      activeOpacity={1}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                      }}>
-                      <LinearGradient
-                        colors={[
-                          'rgba(255, 255, 255, 0.9)',
-                          'rgba(255, 255, 255, 0.9)',
-                          'rgba(255, 255, 255, 0.9)',
-                        ]}
-                        style={{
-                          // flex: 1,
-                          height: height * 0.1,
-                          width: width,
-                        }}
-                      />
-                    </TouchableOpacity>
-                  )}
-                </View>
+                          {/* {index == 0 ? null : (
+                            <TouchableOpacity
+                              onPress={() => {
+                                setModalVisible(true);
+                              }}
+                              activeOpacity={1}
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                              }}>
+                              <LinearGradient
+                                colors={[
+                                  'rgba(255, 255, 255, 0.9)',
+                                  'rgba(255, 255, 255, 0.9)',
+                                  'rgba(255, 255, 255, 0.9)',
+                                ]}
+                                style={{
+                                  // flex: 1,
+                                  height: height * 0.1,
+                                  width: width,
+                                }}
+                              />
+                            </TouchableOpacity>
+                          )} */}
+                        </View>
+                      ) : (
+                        <></>
+                      )}
+                    </Fragment>
+                  ))}
+                </Fragment>
               )}
-              keyExtractor={item => item.id.toString()}
+              // keyExtractor={item => item.id.toString()}
             />
           </View>
         </View>
@@ -260,7 +283,10 @@ const Message = ({navigation}) => {
                   style={{
                     color: '#000',
                     fontSize: 15,
-                    fontFamily: 'ABeeZee-Italic',width: width * 0.3,alignSelf:"center",textAlign:"center"
+                    fontFamily: 'ABeeZee-Italic',
+                    width: width * 0.3,
+                    alignSelf: 'center',
+                    textAlign: 'center',
                   }}>
                   Decline
                 </Text>
@@ -281,7 +307,10 @@ const Message = ({navigation}) => {
                   style={{
                     color: '#FFF',
                     fontSize: 15,
-                    fontFamily: 'ABeeZee-Italic',width: width * 0.3,alignSelf:"center",textAlign:"center"
+                    fontFamily: 'ABeeZee-Italic',
+                    width: width * 0.3,
+                    alignSelf: 'center',
+                    textAlign: 'center',
                   }}>
                   Get Premium
                 </Text>

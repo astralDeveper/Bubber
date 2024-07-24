@@ -53,7 +53,7 @@ const Profile = ({navigation}) => {
         },
       })
       .then(res => {
-        console.log('first', res.data);
+        // console.log('first', res.data);
         setDName(res?.data?.user?.displayName);
         setRName(res?.data?.user?.realName);
         setEmail(res?.data?.user?.email);
@@ -63,6 +63,7 @@ const Profile = ({navigation}) => {
       });
   };
 
+  // const
   useEffect(() => {
     Fetch_Data();
   }, [dToken]);
@@ -93,6 +94,7 @@ const Profile = ({navigation}) => {
       })
       .then(res => {
         console.log(res?.data);
+        alert('Data Updated Successfully');
       })
       .catch(error => {
         console.log(error);
@@ -213,6 +215,8 @@ const Profile = ({navigation}) => {
                 source={
                   imge
                     ? {uri: imge}
+                    : pvide
+                    ? {uri: pvide?.uri}
                     : require('../../assets/Images/Icons/Pro.png')
                 }
                 style={{
@@ -229,7 +233,7 @@ const Profile = ({navigation}) => {
                 fontFamily: 'ABeeZee-Italic',
                 marginBottom: 10,
               }}>
-              Jhon Abraham
+              {dName}
             </Text>
             <Text
               style={{
@@ -238,7 +242,7 @@ const Profile = ({navigation}) => {
                 fontFamily: 'ABeeZee-Italic',
                 marginBottom: 10,
               }}>
-              @jhonabraham
+              {email}
             </Text>
             <TouchableOpacity
               style={{

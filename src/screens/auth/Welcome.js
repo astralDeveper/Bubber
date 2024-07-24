@@ -20,7 +20,7 @@ const Welcome = ({navigation}) => {
       <ImageBackground
         source={Welec}
         style={{
-          flex: 1,
+          flex: 1,height:height
         }}>
         <View
           style={{
@@ -82,7 +82,7 @@ const Welcome = ({navigation}) => {
               family.
             </Text>
           </View>
-          <View
+          {/* <View
             style={{
               alignItems: 'center',
               flexDirection: 'row',
@@ -155,7 +155,7 @@ const Welcome = ({navigation}) => {
                 backgroundColor: '#5F5F5F',
                 borderRadius: 50,
               }}></View>
-          </View>
+          </View> */}
           <TouchableOpacity
           onPress={()=>{
             navigation.navigate("Signup")
@@ -179,7 +179,7 @@ const Welcome = ({navigation}) => {
           }}
             style={{
               alignSelf: 'center',
-              marginVertical: 20,
+              marginTop: 10,
             }}>
             <Text
               style={{

@@ -198,7 +198,7 @@ const Login = () => {
               continue us
             </Text>
           </View>
-          <View
+          {/* <View
             style={{
               alignItems: 'center',
               flexDirection: 'row',
@@ -274,10 +274,10 @@ const Login = () => {
                 backgroundColor: '#5F5F5F',
                 borderRadius: 50,
               }}></View>
-          </View>
+          </View> */}
           <View
             style={{
-              alignItems: 'center',
+              alignItems: 'center',marginTop:20
             }}>
             <Text
               style={{

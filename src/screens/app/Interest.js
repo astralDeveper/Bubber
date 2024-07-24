@@ -115,7 +115,7 @@ const onAdd = async()=>{
         <View
           style={{
             flex: 1,
-            height: height,
+            // height: height,
           }}>
           <TouchableOpacity
             style={{
@@ -328,9 +328,9 @@ const onAdd = async()=>{
               borderRadius: 20,
               width: width * 0.9,
               alignSelf: 'center',
-              // marginVertical: 40,
-              position: 'absolute',
-              bottom: 50,
+              marginVertical: 20,
+              // position: 'absolute',
+              // bottom: 50,
             }}>
             <Text
               style={{

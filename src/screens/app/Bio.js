@@ -89,9 +89,14 @@ const Bio = ({navigation}) => {
 
           if (mediaType.startsWith('image/')) {
             // It's an image
-            let imageUri = pickedMedia.uri;
-            setpivid(imageUri);
-            console.log('first', imageUri);
+            // let imageUri = pickedMedia.uri;
+            let source={
+              uri:response.assets[0]?.uri,
+              type:response.assets[0]?.type,
+              name:response.assets[0]?.fileName
+            }
+            setpivid(source);
+            // console.log('first', response.assets[0]?.uri);
           } else {
             // Unsupported media type
             alert('Unsupported media type');
@@ -103,26 +108,32 @@ const Bio = ({navigation}) => {
       }
     });
   };
-const onCreate =async()=>{
-
-  const response = await axios.post(API.USER.C_PROFILE,{
-    image:pivid,
-    displayName:dName,
-    realName:rName,
-    gender:selectedGender,
-    language:"english",
-    age:age
-  },{headers:{
-    Authorization:dtoken
-  }}).then(response=>{
-    // console.log("first",response?.data)
-    if (response.data.message == "Profile Created Successfully") {
-      navigation.navigate('Interset');
+  const onCreate = async () => {
+    const formData = new FormData();
+    formData.append('image', pivid); // Assuming pivid is a file or Blob
+    formData.append('displayName', dName);
+    formData.append('realName', rName);
+    formData.append('gender', selectedGender);
+    formData.append('language', 'english');
+    formData.append('age', age);
+  
+    try {
+      const response = await axios.post(API.USER.C_PROFILE, formData, {
+        headers: {
+          Authorization: dtoken,
+          'Content-Type': 'multipart/form-data' // Important for FormData
+        }
+      });
+      console.log("Res", response?.data);
+      if (response?.data?.message === "Profile Created Successfully") {
+        alert("Profile Created Successfully")
+        navigation.navigate("Interset")
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }).catch(error=>{
-    console.log(error)
-  })
-}
+  }
+  
   return (
     <SafeAreaView
       style={{
@@ -206,8 +217,9 @@ const onCreate =async()=>{
             <Image
               source={
                 pivid
-                  ? {uri: pivid}
-                  : require('../../assets/Images/Icons/Propic.png')
+                  ? {uri: pivid?.uri}
+                  : 
+                  require('../../assets/Images/Icons/Propic.png')
               }
               style={{
                 height: height * 0.14,

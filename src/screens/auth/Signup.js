@@ -254,10 +254,11 @@ const Signup = ({navigation}) => {
           </View>
           <View
             style={{
-              position: 'absolute',
-              bottom: 30,
+              // position: 'absolute',
+              // bottom: 30,
               alignItems: 'center',
               alignSelf: 'center',
+              marginVertical:40
             }}>
             <TouchableOpacity
               onPress={() => {
