@@ -157,7 +157,7 @@ const Message = ({ navigation }) => {
                               numberOfLines={1}
                               ellipsizeMode={'tail'}
                               style={{
-                                color: '#000',
+                                color: userIndex == 0 ? '#000' : '#d3d3d3',
                                 fontSize: 20,
                                 fontFamily: 'ABeeZee-Italic',
                                 width: width * 0.4,

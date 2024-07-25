@@ -14,7 +14,7 @@ import { Back, Clip, Send } from '../../assets/Images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketContext } from '../../context/SocketContext'; // Ensure correct import
 import axios from 'axios';
-import { BASE_URL } from '../Api';
+import { API, BASE_URL } from '../Api';
 
 const { height, width } = Dimensions.get('window');
 
@@ -72,13 +72,62 @@ const Chat_Sen = ({ navigation, route }) => {
       socketInstance.on('message-delivered', handleDeliveredMessage);
     }
 
+    socketInstance.on('profile-view-request', (data) => {
+      console.log(data);
+    });
+
+    socketInstance.on('profile-view-request-accepted', (data) => {
+      console.log(data);
+    });
+
+
     return () => {
       if (socketInstance) {
         socketInstance.off('new-message', handleNewMessage);
         socketInstance.off('message-delivered', handleDeliveredMessage);
+        socketInstance.off('profile-view-request');
+        socketInstance.off('profile-view-request-accepted');
       }
     };
   }, [socketInstance]);
+
+  const sendProfileViewRequest = async () => {
+    try {
+      const requestData = {
+        userid: userInstance?.user?._id
+      };
+      const rawUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(rawUser);
+      console.log(userInstance?.user?._id, userdata._id)
+      const res = await axios.post(API.USER.REQUEST_PROFILE + userdata._id,
+        requestData,
+        {
+          headers: {
+            Authorization: user.token,
+          }
+        }
+      );
+      console.log(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  };
+  const acceptProfileViewRequest = async () => {
+    try {
+      const requestData = {
+        fromUserId: userInstance?.user?._id, // Replace with actual user ID
+        toUserId: userdata._id // Replace with target user ID
+      };
+      const res = await axios.post(API.USER.ACCEPT_PROFILE + userdata._id);
+      console.log(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+
+
+
 
   useEffect(() => {
     if (scrollViewRef.current && conversation) {
@@ -90,7 +139,7 @@ const Chat_Sen = ({ navigation, route }) => {
     if (socketInstance && userInstance?.user?._id) {
       socketInstance.emit('send-message', {
         from: userInstance.user._id,
-        to: userdata,
+        to: userdata._id,
         message,
       });
       setMessage('');
@@ -111,10 +160,13 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
-            <Text style={styles.displayNameText}>{userdata?.displayName}</Text>
+            <Text style={styles.displayNameText}>{userdata?.displayName ? userdata?.displayName : userdata?.name}</Text>
           </View>
           {!req && (
-            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.profileRequestButton}>
+            <TouchableOpacity onPress={() => {
+              // setModalVisible(true)
+              sendProfileViewRequest()
+            }} style={styles.profileRequestButton}>
               <Text style={styles.profileRequestText}>Profile Request</Text>
             </TouchableOpacity>
           )}
@@ -180,6 +232,7 @@ const Chat_Sen = ({ navigation, route }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setModalVisible(false);
+                    acceptProfileViewRequest()
                     // setReq(true); // Uncomment if needed
                   }}
                   style={styles.allowButton}
@@ -212,7 +265,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   backButton: {
-    width: width * 0.05,
+    width: width * 0.07, height: 40, justifyContent: "center",
   },
   profileRequestButton: {
     backgroundColor: '#FFF',
