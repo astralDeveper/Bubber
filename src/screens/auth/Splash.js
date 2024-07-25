@@ -22,6 +22,7 @@ const Splash = ({ navigation }) => {
           .then(res => {
             setUserInfo(res.data.user);
           });
+          console.log(res,'res')
         let user = await JSON.parse(data);
         setUserInstance(user);
         navigation.replace('BottomTabs');

@@ -21,7 +21,7 @@ const { height, width } = Dimensions.get('window');
 const Chat_Sen = ({ navigation, route }) => {
   const { socketInstance, userInstance } = useContext(SocketContext);
   const [modalVisible, setModalVisible] = useState(false);
-  const [req, setReq] = useState(false);
+  const [req, setReq] = useState(true);
   const { userdata } = route.params;
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState(null);
@@ -73,13 +73,16 @@ const Chat_Sen = ({ navigation, route }) => {
     }
 
     socketInstance.on('profile-view-request', (data) => {
-      console.log(data);
+      alert(data)
+      // setModalVisible(true)
     });
-
     socketInstance.on('profile-view-request-accepted', (data) => {
-      console.log(data);
+      alert(data)
+      setReq(false)
     });
-
+    socketInstance.on('error', (data) => {
+      console.log(data)
+    });
 
     return () => {
       if (socketInstance) {
@@ -87,41 +90,71 @@ const Chat_Sen = ({ navigation, route }) => {
         socketInstance.off('message-delivered', handleDeliveredMessage);
         socketInstance.off('profile-view-request');
         socketInstance.off('profile-view-request-accepted');
+        socketInstance.off('error');
       }
     };
   }, [socketInstance]);
 
   const sendProfileViewRequest = async () => {
     try {
-      const requestData = {
+      const ownId = {
         userid: userInstance?.user?._id
       };
+
+      // Check if userdata is defined and has _id
+      if (!userdata || !userdata._id) {
+        throw new Error('User data is missing or does not contain _id');
+      }
+
       const rawUser = await AsyncStorage.getItem('user');
       const user = JSON.parse(rawUser);
-      console.log(userInstance?.user?._id, userdata._id)
-      const res = await axios.post(API.USER.REQUEST_PROFILE + userdata._id,
-        requestData,
-        {
-          headers: {
-            Authorization: user.token,
-          }
+
+      // Check if the user token exists
+      if (!user?.token) {
+        throw new Error('User token is missing');
+      }
+
+      const res = await axios.post(`${API.USER.REQUEST_PROFILE}${userdata._id}`,
+        ownId, {
+        headers: {
+          Authorization: `${user.token}`,  // Ensure the correct format for Authorization
         }
-      );
-      console.log(res.data)
+      });
+
+      console.log('Response Data:', res.data);
     } catch (error) {
-      console.log(error)
+      console.error('Error occurred:', error.message);  // Log the error message for better debugging
     }
   };
   const acceptProfileViewRequest = async () => {
     try {
-      const requestData = {
-        fromUserId: userInstance?.user?._id, // Replace with actual user ID
-        toUserId: userdata._id // Replace with target user ID
+      const ownId = {
+        userid: userInstance?.user?._id
       };
-      const res = await axios.post(API.USER.ACCEPT_PROFILE + userdata._id);
-      console.log(res.data)
+
+      // Check if userdata is defined and has _id
+      if (!userdata || !userdata._id) {
+        throw new Error('User data is missing or does not contain _id');
+      }
+
+      const rawUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(rawUser);
+
+      // Check if the user token exists
+      if (!user?.token) {
+        throw new Error('User token is missing');
+      }
+
+      const res = await axios.post(`${API.USER.ACCEPT_PROFILE}${userdata._id}`,
+        ownId, {
+        headers: {
+          Authorization: `${user.token}`,  // Ensure the correct format for Authorization
+        }
+      });
+
+      console.log('Response Data:', res.data);
     } catch (error) {
-      console.log(error)
+      console.error('Error occurred:', error.message);  // Log the error message for better debugging
     }
   };
 
@@ -162,7 +195,7 @@ const Chat_Sen = ({ navigation, route }) => {
             </TouchableOpacity>
             <Text style={styles.displayNameText}>{userdata?.displayName ? userdata?.displayName : userdata?.name}</Text>
           </View>
-          {!req && (
+          {req && (
             <TouchableOpacity onPress={() => {
               // setModalVisible(true)
               sendProfileViewRequest()
@@ -233,7 +266,6 @@ const Chat_Sen = ({ navigation, route }) => {
                   onPress={() => {
                     setModalVisible(false);
                     acceptProfileViewRequest()
-                    // setReq(true); // Uncomment if needed
                   }}
                   style={styles.allowButton}
                 >

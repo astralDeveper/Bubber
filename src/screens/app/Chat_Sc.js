@@ -144,14 +144,14 @@ const Message = ({ navigation }) => {
                             alignItems: 'center',
                             justifyContent: 'space-between',
                           }}>
-                          {/* <Image
-                          // source={{ uri: user?.image?.path }}
+                          <Image
+                          source={{ uri: user?.image?.path }}
                           style={{
                             height: 60,
                             width: 60,
                             borderRadius: 100,
                           }}
-                        /> */}
+                        />
                           <View>
                             <Text
                               numberOfLines={1}
