@@ -13,16 +13,16 @@ const Splash = ({ navigation }) => {
     setTimeout(async () => {
       if (data) {
         const token = parsedData.token;
-        const res = await axios
-          .get(API.USER.PROFILE_DATA, {
-            headers: {
-              Authorization: token,
-            },
-          })
-          .then(res => {
-            setUserInfo(res.data.user);
-          });
-          console.log(res,'res')
+        // const res = await axios
+          // .get(API.USER.PROFILE_DATA, {
+          //   headers: {
+          //     Authorization: token,
+          //   },
+          // })
+          // .then(res => {
+          //   setUserInfo(res.data.user);
+          // });
+          // console.log(res,'res')
         let user = await JSON.parse(data);
         setUserInstance(user);
         navigation.replace('BottomTabs');

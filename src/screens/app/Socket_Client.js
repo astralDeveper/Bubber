@@ -80,6 +80,41 @@ const ChatComponent = () => {
       );
     }
   };
+  const sendProfileViewRequest = async (userdata) => {
+    try {
+      const ownId = {
+        userid: userInstance?.user?._id,
+      };
+      console.log(ownId, "s----------------------------------");
+  
+      // Check if userdata is defined and has _id
+      if (!userdata || !userdata._id) {
+        throw new Error('User data is missing or does not contain _id');
+      }
+  
+      // Emit the profile view request event
+      socket.emit('send-profile-view-request', {
+        fromUserId: ownId.userid,
+        toUserId: userdata._id,
+      });
+  
+      // Handle responses
+      socket.on('profile-view-request', (data) => {
+        console.log('Profile view request received:', data);
+      });
+  
+      socket.on('error', (error) => {
+        console.error('Error:', error.message);
+      });
+  
+      socket.on('info', (info) => {
+        console.info('Info:', info.message);
+      });
+  
+    } catch (error) {
+      console.error('Error occurred:', error.message);
+    }
+  };
 
   return (
     <View style={{padding: 20}}>

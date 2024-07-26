@@ -16,6 +16,7 @@ export const API = {
     SUGGES: `${BASE_URL}/friend-ship/get-suggestions`,
     REQUEST_PROFILE: `${BASE_URL}/auth/profile-view-request/`, //targetUserId
     ACCEPT_PROFILE: `${BASE_URL}/auth/profile-view-request/accept/`,  //targetUserId
+    REQUEST_VIEW: `${BASE_URL}/auth/get-Profileforrequest`,  
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };
