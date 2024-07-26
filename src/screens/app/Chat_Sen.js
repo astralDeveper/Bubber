@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Modal,
   StyleSheet,
   Alert,
+  Image,
 } from 'react-native';
 import { Back, Clip, Send } from '../../assets/Images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,55 +18,83 @@ import { SocketContext } from '../../context/SocketContext'; // Ensure correct i
 import axios from 'axios';
 import { API, BASE_URL } from '../Api';
 import { io } from 'socket.io-client';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('window');
 
 const Chat_Sen = ({ navigation, route }) => {
-  
-  const { socketInstance, userInstance } = useContext(SocketContext);
+
+  const { socketInstance, userInstance, userInfo } = useContext(SocketContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [req, setReq] = useState(true);
   const { userdata } = route.params;
   const [message, setMessage] = useState('');
+  const [thatImage, setThatImage] = useState();
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
   const [socket, setSocket] = useState(null);
-  
-
-  const sendProfileViewRequest = async (userdata) => {
+  const otherDetail = async () => {
     try {
-      const ownId = {
-        userid: userInstance?.user?._id,
-      };
-      console.log(ownId, "s----------------------------------");
-  
+      const included = userInfo.isprofileshown.includes(userdata._id);
+      if (included) {
+        const res = await axios.post(API.USER.OTHER_PROFILE, {
+          id: userdata._id
+        })
+        setThatImage(res.data.user.image.path)
+        setReq(false)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      otherDetail()
+    }, []),
+  );
+
+
+  const sendProfileViewRequest = async () => {
+    try {
+      const IDS = {
+        userId: userInfo._id,
+        targetUserId: userdata._id
+      }
+      console.log(IDS, "s----------------------------------");
+
       // Check if userdata is defined and has _id
       if (!userdata || !userdata._id) {
         throw new Error('User data is missing or does not contain _id');
       }
-  
-      // Emit the profile view request event
-      socketInstance.emit('send-profile-view-request', {
-        fromUserId: ownId.userid,
-        toUserId: userdata._id,
-        message:"User Send a Profile View Reques"
-      });
-  
-      // Handle responses
-      socketInstance.on('profile-view-request', (data) => {
-        console.log('Profile view request received:', data);
-      });
-  
-      socketInstance.on('error', (error) => {
-        console.error('Error:', error.message);
-      });
-  
-      socketInstance.on('info', (info) => {
-        console.info('Info:', info.message);
-      });
-  
+
+      const res = await axios.post(API.USER.REQUEST_PROFILE, IDS);
+
+      console.log('res--->', res);
+
     } catch (error) {
-      console.error('Error occurred:', error.message);
+      console.error('Error occurred:', error);
+    }
+  };
+  const grantProfileViewRequest = async () => {
+    try {
+      const IDS = {
+        userId: userInfo._id,
+        requesterId: userdata._id
+      }
+      console.log(IDS, "s----------------------------------");
+
+      // Check if userdata is defined and has _id
+      if (!userdata || !userdata._id) {
+        throw new Error('User data is missing or does not contain _id');
+      }
+
+      const res = await axios.post(API.USER.GRANT_PROFILE, IDS);
+
+      console.log('res--->', res);
+
+    } catch (error) {
+      console.error('Error occurred:', error);
     }
   };
 
@@ -94,11 +123,11 @@ const Chat_Sen = ({ navigation, route }) => {
       console.log('Profile view request received:', data);
       displayProfileViewRequest(data); // Function to display the request
     });
-  
+
     socketInstance.on('error', (error) => {
       console.error('Error:', error.message);
     });
-  
+
     socketInstance.on('info', (info) => {
       console.info('Info:', info.message);
     });
@@ -187,31 +216,31 @@ const Chat_Sen = ({ navigation, route }) => {
   //       userid: userInstance?.user?._id,
   //     };
   //     console.log(ownId, "s----------------------------------");
-  
+
   //     // Check if userdata is defined and has _id
   //     if (!userdata || !userdata._id) {
   //       throw new Error('User data is missing or does not contain _id');
   //     }
-  
+
   //     // Emit the profile view request event
   //     socket.emit('send-profile-view-request', {
   //       fromUserId: ownId.userid,
   //       toUserId: userdata._id,
   //     });
-  
+
   //     // Handle responses
   //     socket.on('profile-view-request', (data) => {
   //       console.log('Profile view request received:', data);
   //     });
-  
+
   //     socket.on('error', (error) => {
   //       console.error('Error:', error.message);
   //     });
-  
+
   //     socket.on('info', (info) => {
   //       console.info('Info:', info.message);
   //     });
-  
+
   //   } catch (error) {
   //     console.error('Error occurred:', error.message);
   //   }
@@ -219,50 +248,50 @@ const Chat_Sen = ({ navigation, route }) => {
 
   // const sendProfileViewRequest = () => {
   //   socket.emit('send-profile-view-request', { ownId, userdata._id });
-  
+
   //   socket.on('profile-view-request', (data) => {
   //     console.log('Profile view request received:', data);
   //   });
-  
+
   //   socket.on('error', (error) => {
   //     console.error('Error:', error.message);
   //   });
-  
+
   //   socket.on('info', (info) => {
   //     console.info('Info:', info.message);
   //   });
   // };
-  const acceptProfileViewRequest = async () => {
-    try {
-      const ownId = {
-        userid: userInstance?.user?._id
-      };
+  // const acceptProfileViewRequest = async () => {
+  //   try {
+  //     const ownId = {
+  //       userid: userInstance?.user?._id
+  //     };
 
-      // Check if userdata is defined and has _id
-      if (!userdata || !userdata._id) {
-        throw new Error('User data is missing or does not contain _id');
-      }
+  //     // Check if userdata is defined and has _id
+  //     if (!userdata || !userdata._id) {
+  //       throw new Error('User data is missing or does not contain _id');
+  //     }
 
-      const rawUser = await AsyncStorage.getItem('user');
-      const user = JSON.parse(rawUser);
+  //     const rawUser = await AsyncStorage.getItem('user');
+  //     const user = JSON.parse(rawUser);
 
-      // Check if the user token exists
-      if (!user?.token) {
-        throw new Error('User token is missing');
-      }
+  //     // Check if the user token exists
+  //     if (!user?.token) {
+  //       throw new Error('User token is missing');
+  //     }
 
-      const res = await axios.post(`${API.USER.ACCEPT_PROFILE}${userdata._id}`,
-        ownId, {
-        headers: {
-          Authorization: `${user.token}`,  // Ensure the correct format for Authorization
-        }
-      });
+  //     const res = await axios.post(`${API.USER.ACCEPT_PROFILE}${userdata._id}`,
+  //       ownId, {
+  //       headers: {
+  //         Authorization: `${user.token}`,  // Ensure the correct format for Authorization
+  //       }
+  //     });
 
-      console.log('Response Data:', res.data);
-    } catch (error) {
-      console.error('Error occurred:', error.message);  // Log the error message for better debugging
-    }
-  };
+  //     console.log('Response Data:', res.data);
+  //   } catch (error) {
+  //     console.error('Error occurred:', error.message);  // Log the error message for better debugging
+  //   }
+  // };
 
 
 
@@ -286,6 +315,19 @@ const Chat_Sen = ({ navigation, route }) => {
       console.error('Socket instance or user ID is missing');
     }
   };
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+
+    // Format the time to "1:00 PM"
+    const options = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true // To get the time in 12-hour format with AM/PM
+    };
+
+    const timeString = date.toLocaleTimeString('en-US', options);
+    return (timeString);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -299,12 +341,21 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
+            <Image
+              source={thatImage
+                ? { uri: thatImage } : require('../../assets/Images/Icons/Pro.png')}
+              style={{
+                height: 50,
+                width: 50,
+                borderRadius: 100,
+              }}
+            />
             <Text style={styles.displayNameText}>{userdata?.displayName ? userdata?.displayName : userdata?.name}</Text>
           </View>
           {req && (
             <TouchableOpacity onPress={() => {
               // setModalVisible(true)
-              sendProfileViewRequest(userdata)
+              sendProfileViewRequest()
             }} style={styles.profileRequestButton}>
               <Text style={styles.profileRequestText}>Profile Request</Text>
             </TouchableOpacity>
@@ -324,13 +375,14 @@ const Chat_Sen = ({ navigation, route }) => {
                 },
               ]}
             >
+              {console.log(item.date)}
               <Text style={[
                 styles.messageText,
                 { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
               ]}>
                 {item?.content}
               </Text>
-              <Text style={styles.timestamp}>10:57 AM</Text>
+              <Text style={styles.timestamp}>{formatTime(item.date)}</Text>
             </View>
           ))}
         </ScrollView>
@@ -343,7 +395,7 @@ const Chat_Sen = ({ navigation, route }) => {
             onChangeText={setMessage}
             style={styles.textInput}
           />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={grantProfileViewRequest}>
             <Clip />
           </TouchableOpacity>
           <TouchableOpacity onPress={sendMessage}>
@@ -371,7 +423,7 @@ const Chat_Sen = ({ navigation, route }) => {
                 <TouchableOpacity
                   onPress={() => {
                     setModalVisible(false);
-                    acceptProfileViewRequest()
+                    grantProfileViewRequest()
                   }}
                   style={styles.allowButton}
                 >

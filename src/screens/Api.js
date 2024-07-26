@@ -15,9 +15,11 @@ export const API = {
     UPDATE_DATA: `${BASE_URL}/auth/update-profile`,
     GET_CONVERSATIONS: `${BASE_URL}/auth/get-conversations`,
     SUGGES: `${BASE_URL}/friend-ship/get-suggestions`,
-    REQUEST_PROFILE: `${BASE_URL}/auth/profile-view-request/`, //targetUserId
-    ACCEPT_PROFILE: `${BASE_URL}/auth/profile-view-request/accept/`,  //targetUserId
-    REQUEST_VIEW: `${BASE_URL}/auth/get-Profileforrequest`,  
+    REQUEST_PROFILE: `${BASE_URL}/auth/request-profile-view`, //targetUserId
+    GRANT_PROFILE: `${BASE_URL}/auth/grant-profile-view`,  //targetUserId
+    ACCEPT_PROFILE: `${BASE_URL}/auth/profile-view-request/accept`,  //targetUserId
+    REQUEST_VIEW: `${BASE_URL}/auth/get-Profileforrequest`,
+    OTHER_PROFILE: `${BASE_URL}/auth/other-profile`,
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };

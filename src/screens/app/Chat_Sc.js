@@ -16,27 +16,26 @@ import {
   Image,
   StyleSheet,
   Modal,
+  Button,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {Mag} from '../../assets/Images';
-import {Chat_Da} from '../Dummy';
+import { Mag } from '../../assets/Images';
+import { Chat_Da } from '../Dummy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {API} from '../Api';
-import {SocketContext} from '../../context/SocketContext';
-import {timeAgo} from '../../libs/timeAgo';
-import {useFocusEffect} from '@react-navigation/native';
+import { API } from '../Api';
+import { SocketContext } from '../../context/SocketContext';
+import { timeAgo } from '../../libs/timeAgo';
+import { useFocusEffect } from '@react-navigation/native';
 
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
-const Message = ({navigation}) => {
+const Message = ({ navigation }) => {
   const [conData, setConData] = useState();
-  const {userInstance, userInfo} = useContext(SocketContext);
-  const {lastMTime, setlastMTime} = useContext(SocketContext);
+  const { userInstance, userInfo, setUserInfo } = useContext(SocketContext);
   const [notification, setNotification] = useState(false);
-  const [myId, setMyId] = useState();
-  const [twoId, setTwoId] = useState();
-
+  const [requestsData, setRequestsData] = useState([]);
+  console.log(userInfo._id, userInfo.name)
   const Get_cons = async () => {
     try {
       const res = await axios.get(API.USER.GET_CONVERSATIONS, {
@@ -58,28 +57,6 @@ const Message = ({navigation}) => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AsyncStorage.getItem('user');
-        if (data) {
-          const parsedData = JSON.parse(data);
-          setMyId(parsedData?.user?.profileViewRequests);
-          // console.log(parsedData?.user?.profileViewRequests)
-          const dataArray = parsedData?.user?.profileViewRequests;
-          const dataString = dataArray.join(','); // You can use a different delimiter if needed
-          setTwoId(dataString);
-          // console.log(dataString)
-        } else {
-          console.log('No data found');
-        }
-      } catch (error) {
-        console.error('Error retrieving data', error);
-      }
-    };
-
-    fetchData();
-  }, []);
   useFocusEffect(
     useCallback(() => {
       Get_cons();
@@ -96,38 +73,37 @@ const Message = ({navigation}) => {
   };
   const ProById = async () => {
     try {
-      const response = await axios.get(`${API.USER.REQUEST_VIEW}`, {
-        id: twoId // Pass the IDs as a single string, comma-separated
-      });
-      console.log('Response==================', twoId);
-      console.log('Response', response?.data);
+      const id = { id: userInfo._id }
+      const response = await axios.post(`${API.USER.REQUEST_VIEW}`, id)
+      setRequestsData(response.data.data);
+      setNotification(true);
     } catch (error) {
       console.error(
         'Error',
-        error.response ? error.response.data : error.message,
+        error,
       );
     }
   };
-  
 
-  // const ProById =async()=>{
-  //   const res = await axios.get(API.USER.REQUEST_VIEW,{
-  //     uid:twoId
-  //   }).then(res=>{
-  //     console.log("asdfadfasdf",res?.data)
-  //   }).catch(error=>{
-  //     console.log("errror",error)
-  //   })
-  // }
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
 
-  console.log('-===================================', twoId);
-  // useEffect(() => {
-  //   ProById();
-  // }, []);
+    // Format the time to "1:00 PM"
+    const options = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true // To get the time in 12-hour format with AM/PM
+    };
+
+    const timeString = date.toLocaleTimeString('en-US', options);
+    return (timeString);
+  };
+
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#3EC8BF'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#3EC8BF' }}>
       <ScrollView>
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <View
             style={{
               flexDirection: 'row',
@@ -156,10 +132,7 @@ const Message = ({navigation}) => {
             </Text>
 
             <TouchableOpacity
-              onPress={() => {
-                // setNotification(true);
-                ProById();
-              }}
+              onPress={ProById}
               style={{
                 backgroundColor: '#8e8e8e',
                 padding: 5,
@@ -179,7 +152,7 @@ const Message = ({navigation}) => {
               <Image
                 source={
                   userInfo.image?.path
-                    ? {uri: userInfo.image.path}
+                    ? { uri: userInfo.image.path }
                     : require('../../assets/Images/Icons/Pro.png')
                 }
                 style={{
@@ -202,7 +175,7 @@ const Message = ({navigation}) => {
               item.participants.map((user, index) => (
                 <Fragment key={index}>
                   {user?._id !== userInstance?.user?._id ? (
-                    <View style={{backgroundColor: 'rgba(255,255,255,0.8)'}}>
+                    <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
                       <TouchableOpacity
                         onPress={async () => {
                           if (userIndex == 0) {
@@ -227,8 +200,9 @@ const Message = ({navigation}) => {
                             justifyContent: 'space-between',
                           }}>
                           <Image
-                            // source={{ uri: user?.image?.path }}
-                            source={require('../../assets/Images/Icons/Sugp.png')}
+                            source={user?.image?.path ?
+                              { uri: user?.image?.path } :
+                              require('../../assets/Images/Icons/Sugp.png')}
                             style={{
                               height: 60,
                               width: 60,
@@ -249,7 +223,9 @@ const Message = ({navigation}) => {
                             </Text>
                           </View>
                         </View>
-                        <View></View>
+                        <View>
+                          <Text>{formatTime(item.lastMessageTimestamp)}</Text>
+                        </View>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -339,16 +315,78 @@ const Message = ({navigation}) => {
       <Modal transparent={true} visible={notification} animationType="slide">
         <TouchableOpacity
           activeOpacity={1}
-          onPress={() => {
-            setNotification(false);
-          }}
+          onPress={() => setNotification(false)}
           style={styles.modalBackground}>
-          <View style={styles.modalContainer}></View>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.modalContainer}>
+            <FlatList
+              contentContainerStyle={{
+                gap: 10
+              }}
+              data={requestsData}
+              ListEmptyComponent={<View style={{
+                width: "100%",
+                height: 200,
+                backgroundColor: 'white'
+              }}>
+                <Text style={{
+                  color: '#000',
+                  fontSize: 18,
+                  fontFamily: 'ABeeZee-Italic',
+                  alignSelf: 'center',
+                  textAlign: 'center',
+                }}>
+                  Notification Empty
+                </Text>
+              </View>}
+              renderItem={({ item }) => <RenderItem
+                item={item}
+                userId={userInfo._id}
+                setNotification={setNotification}
+                setUserInfo={setUserInfo}
+              />}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
 };
+
+
+const RenderItem = ({ item, userId, setNotification, setUserInfo }) => (
+  <View style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  }}>
+    <Text style={styles.modalMessage}>{item.displayName}</Text>
+    <TouchableOpacity
+      onPress={async () => {
+        const res = await axios.post(API.USER.ACCEPT_PROFILE,
+          {
+            userid: userId,
+            targetUserId: item._id
+          }
+        )
+        setUserInfo(res.data.user)
+        setNotification(false)
+      }}
+      style={styles.allowButton}
+    >
+      <Text style={styles.modalActionText}>Allow</Text>
+    </TouchableOpacity>
+  </View>
+)
+
+
 
 const styles = StyleSheet.create({
   modalBackground: {
@@ -368,6 +406,25 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 18,
+  },
+  allowButton: {
+    backgroundColor: '#3EC8BF',
+    padding: 8,
+    width: width * 0.15,
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  modalMessage: {
+    color: '#000',
+    fontSize: 18,
+    fontFamily: 'ABeeZee-Italic',
+    alignSelf: 'center',
+    textAlign: 'center',
+  },
+  modalActionText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'ABeeZee-Italic',
   },
 });
 export default Message;

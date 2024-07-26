@@ -13,6 +13,7 @@ const Splash = ({ navigation }) => {
     setTimeout(async () => {
       if (data) {
         const token = parsedData.token;
+        console.log(token)
         await axios
           .get(API.USER.PROFILE_DATA, {
             headers: {

@@ -29,14 +29,13 @@ const Signup = ({ navigation }) => {
         Alert.alert('Error', 'All fields are required.');
         return;
       }
-
       let res = await axios.post(API.USER.SIGNUP, {
         name: name,
         email: email,
         password: pass,
       });
       setUserInstance(res?.data);
-      setUserInfo(response?.data?.user)
+      setUserInfo(res?.data?.user)
       await AsyncStorage.setItem('user', JSON.stringify(res?.data));
       Alert.alert('Sign Up successful.');
       navigation?.navigate('Bio');
