@@ -8,17 +8,17 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useCallback, useContext, useState} from 'react';
-import {Appl, Appl_B, Back_Arrow, Face, Goo} from '../../assets/Images';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import React, { useCallback, useContext, useState } from 'react';
+import { Appl, Appl_B, Back_Arrow, Face, Goo } from '../../assets/Images';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import {API} from '../Api';
-import {useNavigation} from '@react-navigation/native';
-import {SocketContext} from '../../context/SocketContext';
-const Login = ({navigation}) => {
-  const {setUserInstance} = useContext(SocketContext);
+import { API } from '../Api';
+import { useNavigation } from '@react-navigation/native';
+import { SocketContext } from '../../context/SocketContext';
+const Login = ({ navigation }) => {
+  const { setUserInstance, setUserInfo } = useContext(SocketContext);
   const [email, setEmail] = useState();
   const [pass, setPass] = useState();
   // const navigation = useNavigation();
@@ -37,10 +37,10 @@ const Login = ({navigation}) => {
   });
   const onGoogleButtonPress = useCallback(async () => {
     try {
-      await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       const userInfo = await GoogleSignin.signIn();
 
-      const {idToken} = await userInfo;
+      const { idToken } = await userInfo;
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       console.log('22222', userInfo);
@@ -52,75 +52,25 @@ const Login = ({navigation}) => {
     }
   });
 
-  // const handleLogin = () => {
-
-  //   if (!email.trim() || !pass.trim()) {
-  //     Alert.alert("Error", "All fields are required.");
-  //     return;
-  //   }
-
-  //   axios.post(API.USER.LOGIN, {
-  //     email: email,
-  //     password: pass,
-  //   })
-  //   .then(response => {
-  //     if (response?.data?.message === "Login successful.") {
-  //       AsyncStorage.setItem("user", JSON.stringify(response?.data))
-  //         .then(() => {
-  //           navigation.navigate("Bio");
-  //           Alert.alert("Success", "Login Successful");
-
-  //         })
-  //         .catch(error => {
-  //           console.error("AsyncStorage Error:", error);
-  //           Alert.alert("Error", "Failed to save user data. Please try again.");
-  //         });
-  //     } else {
-  //       Alert.alert("Success", response?.data?.message || "Login failed");
-  //     }
-  //   })
-  //   .catch(error => {
-  //     if (error.response) {
-  //       // Server responded with a status other than 200 range
-  //       const status = error.response.status;
-  //       const message = error.response.data.message || error.response.data.msg;
-
-  //       if (status === 400) {
-  //         Alert.alert("Error", "Bad request! All fields are required.");
-  //       } else if (status === 404) {
-  //         Alert.alert("Error", message || "User not found or incorrect email/password.");
-  //       } else {
-  //         Alert.alert("Error", message || "Login failed");
-  //       }
-  //     } else if (error.request) {
-  //       // Request was made but no response was received
-  //       console.error("Login Error: No response received", error.request);
-  //       Alert.alert("Error", "No response from server. Please try again later.");
-  //     } else {
-  //       // Something else happened while setting up the request
-  //       console.error("Login Error:", error.message);
-  //       Alert.alert("Error", "An error occurred during login. Please try again.");
-  //     }
-  //   });
-  // };
-
   const handleLogin = async () => {
-     await axios
+    await axios
       .post(API.USER.LOGIN, {
         email: email,
         password: pass,
       })
-      .then(async(response) => {
+      .then(async (response) => {
         console.log(response?.data);
         if (response?.data) {
-          // alert("Login Successfull")
+          alert("Login Successfull")
           setUserInstance(response?.data);
+          setUserInfo(response?.data?.user)
           await AsyncStorage.setItem('user', JSON.stringify(response?.data));
           console.log(navigation)
           navigation.navigate('BottomTabs');
         }
       })
       .catch(response => {
+        console.log(response)
         if (response?.message == 'Request failed with status code 404') {
           alert('User not found with this email! .');
         }
@@ -158,7 +108,7 @@ const Login = ({navigation}) => {
               justifyContent: 'space-between',
               marginTop: height * 0.08,
             }}>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
             <View
               style={{
                 width: width * 0.5,
@@ -180,7 +130,7 @@ const Login = ({navigation}) => {
                 Log in to Bubber
               </Text>
             </View>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
           </View>
           <View
             style={{
@@ -199,7 +149,170 @@ const Login = ({navigation}) => {
               continue us
             </Text>
           </View>
-          {/* <View
+          {/* comment code put here  */}
+          <View
+            style={{
+              alignItems: 'center', marginTop: 20
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: '#3EC8BF',
+                width: width * 0.8,
+              }}>
+              Your email
+            </Text>
+            <TextInput
+              value={email}
+              onChangeText={text => {
+                setEmail(text);
+              }}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#5F5F5F',
+                color: '#000',
+                width: width * 0.8,
+                padding: 5,
+              }}
+            />
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+              marginTop: 20,
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: '#3EC8BF',
+                width: width * 0.8,
+              }}>
+              Password
+            </Text>
+            <TextInput
+              value={pass}
+              onChangeText={text => {
+                setPass(text);
+              }}
+              secureTextEntry={true}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#5F5F5F',
+                color: '#000',
+                width: width * 0.8,
+                padding: 5,
+              }}
+            />
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 30,
+              alignItems: 'center',
+              alignSelf: 'center',
+            }}>
+            <TouchableOpacity
+              onPress={handleLogin}
+              disabled={email && pass ? false : true}
+              style={{
+                backgroundColor: email && pass ? '#33E0CF' : '#F3F6F6',
+                padding: 15,
+                alignItems: 'center',
+                borderRadius: 20,
+                width: width * 0.9,
+                alignSelf: 'center',
+              }}>
+              <Text
+                style={{
+                  color: email && pass ? '#FFF' : '#797C7B',
+                  fontSize: 25,
+                  fontFamily: 'ABeeZee-Italic',
+                }}>
+                Log in
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Forgep');
+              }}>
+              <Text
+                style={{
+                  color: '#3EC8BF',
+                  fontSize: 18,
+                  fontFamily: 'ABeeZee-Italic',
+                  marginVertical: 20,
+                  alignSelf: 'center',
+                }}>
+                Forgot password?
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView >
+  );
+};
+const { height, width } = Dimensions.get('window');
+export default Login;
+
+
+
+// const handleLogin = () => {
+
+//   if (!email.trim() || !pass.trim()) {
+//     Alert.alert("Error", "All fields are required.");
+//     return;
+//   }
+
+//   axios.post(API.USER.LOGIN, {
+//     email: email,
+//     password: pass,
+//   })
+//   .then(response => {
+//     if (response?.data?.message === "Login successful.") {
+//       AsyncStorage.setItem("user", JSON.stringify(response?.data))
+//         .then(() => {
+//           navigation.navigate("Bio");
+//           Alert.alert("Success", "Login Successful");
+
+//         })
+//         .catch(error => {
+//           console.error("AsyncStorage Error:", error);
+//           Alert.alert("Error", "Failed to save user data. Please try again.");
+//         });
+//     } else {
+//       Alert.alert("Success", response?.data?.message || "Login failed");
+//     }
+//   })
+//   .catch(error => {
+//     if (error.response) {
+//       // Server responded with a status other than 200 range
+//       const status = error.response.status;
+//       const message = error.response.data.message || error.response.data.msg;
+
+//       if (status === 400) {
+//         Alert.alert("Error", "Bad request! All fields are required.");
+//       } else if (status === 404) {
+//         Alert.alert("Error", message || "User not found or incorrect email/password.");
+//       } else {
+//         Alert.alert("Error", message || "Login failed");
+//       }
+//     } else if (error.request) {
+//       // Request was made but no response was received
+//       console.error("Login Error: No response received", error.request);
+//       Alert.alert("Error", "No response from server. Please try again later.");
+//     } else {
+//       // Something else happened while setting up the request
+//       console.error("Login Error:", error.message);
+//       Alert.alert("Error", "An error occurred during login. Please try again.");
+//     }
+//   });
+// };
+
+
+
+
+{/* <View
             style={{
               alignItems: 'center',
               flexDirection: 'row',
@@ -276,110 +389,3 @@ const Login = ({navigation}) => {
                 borderRadius: 50,
               }}></View>
           </View> */}
-          <View
-            style={{
-              alignItems: 'center',marginTop:20
-            }}>
-            <Text
-              style={{
-                fontSize: 18,
-                color: '#3EC8BF',
-                width: width * 0.8,
-              }}>
-              Your email
-            </Text>
-            <TextInput
-              value={email}
-              onChangeText={text => {
-                setEmail(text);
-              }}
-              style={{
-                borderBottomWidth: 1,
-                borderColor: '#5F5F5F',
-                color: '#000',
-                width: width * 0.8,
-                padding: 5,
-              }}
-            />
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-              marginTop: 20,
-            }}>
-            <Text
-              style={{
-                fontSize: 18,
-                color: '#3EC8BF',
-                width: width * 0.8,
-              }}>
-              Password
-            </Text>
-            <TextInput
-              value={pass}
-              onChangeText={text => {
-                setPass(text);
-              }}
-              secureTextEntry={true}
-              style={{
-                borderBottomWidth: 1,
-                borderColor: '#5F5F5F',
-                color: '#000',
-                width: width * 0.8,
-                padding: 5,
-              }}
-            />
-          </View>
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 30,
-              alignItems: 'center',
-              alignSelf: 'center',
-            }}>
-            <TouchableOpacity
-              onPress={() => {
-                // navigation.navigate('Bio');
-                handleLogin();
-              }}
-              disabled={email && pass ? false : true}
-              style={{
-                backgroundColor: email && pass ? '#33E0CF' : '#F3F6F6',
-                padding: 15,
-                alignItems: 'center',
-                borderRadius: 20,
-                width: width * 0.9,
-                alignSelf: 'center',
-              }}>
-              <Text
-                style={{
-                  color: email && pass ? '#FFF' : '#797C7B',
-                  fontSize: 25,
-                  fontFamily: 'ABeeZee-Italic',
-                }}>
-                Log in
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate('Forgep');
-              }}>
-              <Text
-                style={{
-                  color: '#3EC8BF',
-                  fontSize: 18,
-                  fontFamily: 'ABeeZee-Italic',
-                  marginVertical: 20,
-                  alignSelf: 'center',
-                }}>
-                Forgot password?
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
-const {height, width} = Dimensions.get('window');
-export default Login;

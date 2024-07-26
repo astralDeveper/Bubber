@@ -8,15 +8,15 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
-import {Appl, Appl_B, Back_Arrow, Face, Goo} from '../../assets/Images';
-import {API} from '../Api';
+import React, { useContext, useState } from 'react';
+import { Appl, Appl_B, Back_Arrow, Face, Goo } from '../../assets/Images';
+import { API } from '../Api';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {SocketContext} from '../../context/SocketContext';
+import { SocketContext } from '../../context/SocketContext';
 
-const Signup = ({navigation}) => {
-  const {setUserInstance} = useContext(SocketContext);
+const Signup = ({ navigation }) => {
+  const { setUserInstance, setUserInfo } = useContext(SocketContext);
   const [email, setEmail] = useState();
   const [pass, setPass] = useState();
   const [name, setName] = useState();
@@ -36,6 +36,7 @@ const Signup = ({navigation}) => {
         password: pass,
       });
       setUserInstance(res?.data);
+      setUserInfo(response?.data?.user)
       await AsyncStorage.setItem('user', JSON.stringify(res?.data));
       Alert.alert('Sign Up successful.');
       navigation?.navigate('Bio');
@@ -100,7 +101,7 @@ const Signup = ({navigation}) => {
               justifyContent: 'space-between',
               marginTop: height * 0.08,
             }}>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
             <View
               style={{
                 width: width * 0.5,
@@ -122,7 +123,7 @@ const Signup = ({navigation}) => {
                 Log in to Bubber
               </Text>
             </View>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
           </View>
           <View
             style={{
@@ -258,7 +259,7 @@ const Signup = ({navigation}) => {
               // bottom: 30,
               alignItems: 'center',
               alignSelf: 'center',
-              marginVertical:40
+              marginVertical: 40
             }}>
             <TouchableOpacity
               onPress={() => {
@@ -290,5 +291,5 @@ const Signup = ({navigation}) => {
     </SafeAreaView>
   );
 };
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 export default Signup;
