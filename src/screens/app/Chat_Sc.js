@@ -26,6 +26,7 @@ const { height, width } = Dimensions.get('window');
 const Message = ({ navigation }) => {
   const [conData, setConData] = useState();
   const { userInstance, userInfo } = useContext(SocketContext);
+  const { lastMTime, setlastMTime } = useContext(SocketContext);
 
   const Get_cons = async () => {
     try {
@@ -45,6 +46,7 @@ const Message = ({ navigation }) => {
       console.log('error', error);
     }
   };
+  console.log("first=>>>>>",conData)
 
   useFocusEffect(
     useCallback(() => {
@@ -122,8 +124,10 @@ const Message = ({ navigation }) => {
                   {user?._id !== userInstance?.user?._id ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
                       <TouchableOpacity
-                        onPress={() => {
+                        onPress={async() => {
+                         
                           if (userIndex == 0) {
+                            
                             navigation.navigate('Chat_Sen', {
                               userdata: user,
                             });
@@ -145,7 +149,8 @@ const Message = ({ navigation }) => {
                             justifyContent: 'space-between',
                           }}>
                           <Image
-                          source={{ uri: user?.image?.path }}
+                          // source={{ uri: user?.image?.path }}
+                          source={require('../../assets/Images/Icons/Sugp.png')}
                           style={{
                             height: 60,
                             width: 60,

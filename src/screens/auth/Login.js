@@ -17,11 +17,11 @@ import axios from 'axios';
 import {API} from '../Api';
 import {useNavigation} from '@react-navigation/native';
 import {SocketContext} from '../../context/SocketContext';
-const Login = () => {
+const Login = ({navigation}) => {
   const {setUserInstance} = useContext(SocketContext);
   const [email, setEmail] = useState();
   const [pass, setPass] = useState();
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   GoogleSignin.configure({
     webClientId:
@@ -105,17 +105,18 @@ const Login = () => {
   // };
 
   const handleLogin = async () => {
-    const response = await axios
+     await axios
       .post(API.USER.LOGIN, {
         email: email,
         password: pass,
       })
-      .then(response => {
+      .then(async(response) => {
         console.log(response?.data);
-        if (response?.data?.message == 'Login successfull.') {
+        if (response?.data) {
           // alert("Login Successfull")
           setUserInstance(response?.data);
-          AsyncStorage.setItem('user', JSON.stringify(response?.data));
+          await AsyncStorage.setItem('user', JSON.stringify(response?.data));
+          console.log(navigation)
           navigation.navigate('BottomTabs');
         }
       })
