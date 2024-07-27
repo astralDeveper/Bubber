@@ -45,7 +45,7 @@ const Chat_Sen = ({ navigation, route }) => {
         })
         if (res.data.user.isprofileshown.includes(userInfo._id)) setRequest(false)
         setThatImage(res.data.user.image.path)
-        setName(res.data.user.name)
+        setName(res.data.user.realName)
         setReq(false)
       } else {
         const res = await axios.post(API.USER.OTHER_PROFILE, {
@@ -154,6 +154,7 @@ const Chat_Sen = ({ navigation, route }) => {
     notificationArea.appendChild(notification);
   };
   // Fetch conversation when component mounts or userdata changes
+
   useEffect(() => {
     const getConversation = async () => {
       try {
@@ -221,92 +222,6 @@ const Chat_Sen = ({ navigation, route }) => {
       }
     };
   }, [socketInstance]);
-  // const sendProfileViewRequest = async (userdata) => {
-  //   try {
-  //     const ownId = {
-  //       userid: userInstance?.user?._id,
-  //     };
-  //     console.log(ownId, "s----------------------------------");
-
-  //     // Check if userdata is defined and has _id
-  //     if (!userdata || !userdata._id) {
-  //       throw new Error('User data is missing or does not contain _id');
-  //     }
-
-  //     // Emit the profile view request event
-  //     socket.emit('send-profile-view-request', {
-  //       fromUserId: ownId.userid,
-  //       toUserId: userdata._id,
-  //     });
-
-  //     // Handle responses
-  //     socket.on('profile-view-request', (data) => {
-  //       console.log('Profile view request received:', data);
-  //     });
-
-  //     socket.on('error', (error) => {
-  //       console.error('Error:', error.message);
-  //     });
-
-  //     socket.on('info', (info) => {
-  //       console.info('Info:', info.message);
-  //     });
-
-  //   } catch (error) {
-  //     console.error('Error occurred:', error.message);
-  //   }
-  // };
-
-  // const sendProfileViewRequest = () => {
-  //   socket.emit('send-profile-view-request', { ownId, userdata._id });
-
-  //   socket.on('profile-view-request', (data) => {
-  //     console.log('Profile view request received:', data);
-  //   });
-
-  //   socket.on('error', (error) => {
-  //     console.error('Error:', error.message);
-  //   });
-
-  //   socket.on('info', (info) => {
-  //     console.info('Info:', info.message);
-  //   });
-  // };
-  // const acceptProfileViewRequest = async () => {
-  //   try {
-  //     const ownId = {
-  //       userid: userInstance?.user?._id
-  //     };
-
-  //     // Check if userdata is defined and has _id
-  //     if (!userdata || !userdata._id) {
-  //       throw new Error('User data is missing or does not contain _id');
-  //     }
-
-  //     const rawUser = await AsyncStorage.getItem('user');
-  //     const user = JSON.parse(rawUser);
-
-  //     // Check if the user token exists
-  //     if (!user?.token) {
-  //       throw new Error('User token is missing');
-  //     }
-
-  //     const res = await axios.post(`${API.USER.ACCEPT_PROFILE}${userdata._id}`,
-  //       ownId, {
-  //       headers: {
-  //         Authorization: `${user.token}`,  // Ensure the correct format for Authorization
-  //       }
-  //     });
-
-  //     console.log('Response Data:', res.data);
-  //   } catch (error) {
-  //     console.error('Error occurred:', error.message);  // Log the error message for better debugging
-  //   }
-  // };
-
-
-
-
 
   useEffect(() => {
     if (scrollViewRef.current && conversation) {
@@ -343,8 +258,6 @@ const Chat_Sen = ({ navigation, route }) => {
     const timeString = date.toLocaleTimeString('en-US', options);
     return (timeString);
   };
-
-  console.log('userdata._id=====>',userdata._id)
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -440,22 +353,17 @@ const Chat_Sen = ({ navigation, route }) => {
                 <TouchableOpacity
                   onPress={async () => {
                     try {
-
                       if (isFirst && userdata._id) {
                         // const data = await AsyncStorage.getItem('user');
                         // const parsedData = JSON.parse(data);
                         // const token = parsedData.token;
                         // const res = await axios.post(API.USER.CONVERSATIONS_START, {
-                        //   participantId: userdata._id
-                        // },
-                        //   {
-                        //     headers: {
-                        //       Authorization: token
-                        //     }
-                        //   });
-                        // await AsyncStorage.setItem('ChatID', userdata._id)
-                        // setModalVisible(false)
-                        // setisFirst(false)
+                        //   participantId: userdata._id,
+                        //   userID: userInfo._id
+                        // });
+                        await AsyncStorage.setItem('ChatID', userdata._id)
+                        setModalVisible(false)
+                        setisFirst(false)
                       }
                     } catch (error) {
                       console.log(error)

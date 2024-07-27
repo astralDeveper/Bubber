@@ -216,7 +216,7 @@ const Message = ({ navigation }) => {
                         onPress={async () => {
                           if (userIndex == 0) {
                             navigation.navigate('Chat_Sen', {
-                              userdata: user, isFirst: false
+                              userdata: user, isFirst: false, conversationid: item._id
                             });
                           } else setModalVisible(true);
                         }}
@@ -384,7 +384,9 @@ const Message = ({ navigation }) => {
               ListEmptyComponent={<View style={{
                 width: "100%",
                 height: 200,
-                backgroundColor: 'white'
+                backgroundColor: 'white',
+                justifyContent:'center',
+                alignItems:'center'
               }}>
                 <Text style={{
                   color: '#000',
@@ -424,6 +426,21 @@ const RenderItem = ({ item, userId, setNotification, setUserInfo }) => (
     paddingVertical: 5,
   }}>
     <Text style={styles.modalMessage}>{item.displayName}</Text>
+    <TouchableOpacity
+      onPress={async () => {
+        const res = await axios.post(API.USER.DENY_PROFILE,
+          {
+            userId: userId,
+            requesterId: item._id
+          }
+        )
+        setUserInfo(res.data.user)
+        setNotification(false)
+      }}
+      style={styles.allowButton}
+    >
+      <Text style={styles.modalActionText}>Deny</Text>
+    </TouchableOpacity>
     <TouchableOpacity
       onPress={async () => {
         const res = await axios.post(API.USER.ACCEPT_PROFILE,

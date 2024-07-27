@@ -19,6 +19,7 @@ export const API = {
     GRANT_PROFILE: `${BASE_URL}/auth/grant-profile-view`,  //targetUserId
     ACCEPT_PROFILE: `${BASE_URL}/auth/profile-view-request/accept`,  //targetUserId
     REQUEST_VIEW: `${BASE_URL}/auth/get-Profileforrequest`,
+    DENY_PROFILE: `${BASE_URL}/auth/deny-profile-view`,
     OTHER_PROFILE: `${BASE_URL}/auth/other-profile`,
     CONVERSATIONS_START: `${BASE_URL}/auth/conversations/start`,
     // UPDATE_DATA :`${BASE_URL}/test`,

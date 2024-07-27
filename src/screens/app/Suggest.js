@@ -66,6 +66,7 @@ const Suggestion = ({ navigation }) => {
         },
       });
       setUData(res?.data?.suggestions);
+      console.log('res?.data?.suggestions',res?.data?.suggestions)
     } catch (error) {
       console.log('error', error);
     }
@@ -118,7 +119,6 @@ const Suggestion = ({ navigation }) => {
             <FlatList
               data={uData}
               renderItem={({ item, index }) => {
-                console.log("type========>", item?.user?.type)
                 const isDisabled =
                   selectedChatID != item.user._id ? true : false;
                 return (isDisabled &&
@@ -133,7 +133,7 @@ const Suggestion = ({ navigation }) => {
                           style={styles.userName}
                           numberOfLines={1}
                           ellipsizeMode="tail">
-                          {item?.user?.name}
+                          {item?.user?.displayName}
                         </Text>
                       </View>
                       <TouchableOpacity
