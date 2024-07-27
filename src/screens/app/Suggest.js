@@ -84,11 +84,11 @@ const Suggestion = ({ navigation }) => {
   };
 
   const handleModalConfirm = async () => {
-    if (pendingChatID) await AsyncStorage.setItem('ChatID', pendingChatID)
+    // if (pendingChatID) await AsyncStorage.setItem('ChatID', pendingChatID)
     setSelectedChatID(pendingChatID);
     setModalVisible(false);
     setpendingChatID(null);
-    navigation.navigate('Chat_Sen', { userdata: chatUserData });
+    navigation.navigate('Chat_Sen', { userdata: chatUserData, first: true });
   };
 
   const handleModalCancel = () => {
@@ -120,30 +120,33 @@ const Suggestion = ({ navigation }) => {
             <FlatList
               data={uData}
               renderItem={({ item, index }) => {
+                console.log("type========>", item?.user?.type)
                 const isDisabled =
                   selectedChatID != item.user._id ? true : false;
                 return (isDisabled &&
-                  <View style={styles.listItem}>
-                    <View style={styles.userInfo}>
-                      <Image
-                        source={require('../../assets/Images/Icons/Sugp.png')}
-                        style={styles.userImage}
-                      />
-                      <Text
-                        style={styles.userName}
-                        numberOfLines={1}
-                        ellipsizeMode="tail">
-                        {item?.user?.name}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleItemPress(index, item);
-                      }}
-                      // disabled={isDisabled}
-                      style={styles.chatButton}>
-                      <Text style={styles.chatButtonText}>Chat</Text>
-                    </TouchableOpacity>
+                  <View>
+                    {item?.user?.type === "super-admin" ? null : <View style={styles.listItem}>
+                      <View style={styles.userInfo}>
+                        <Image
+                          source={require('../../assets/Images/Icons/Sugp.png')}
+                          style={styles.userImage}
+                        />
+                        <Text
+                          style={styles.userName}
+                          numberOfLines={1}
+                          ellipsizeMode="tail">
+                          {item?.user?.name}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleItemPress(index, item);
+                        }}
+                        // disabled={isDisabled}
+                        style={styles.chatButton}>
+                        <Text style={styles.chatButtonText}>Chat</Text>
+                      </TouchableOpacity>
+                    </View>}
                   </View>
                 );
               }}

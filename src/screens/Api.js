@@ -1,6 +1,6 @@
 
 // export const BASE_URL = 'http://192.168.100.37:3000';
-export const BASE_URL = 'http://192.168.100.21:3000';
+export const BASE_URL = 'http://192.168.100.61:3000';
 // export const BASE_URL = 'https://chatting-app-backend-rw5k.onrender.com';
 
 

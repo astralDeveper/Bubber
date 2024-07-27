@@ -30,9 +30,12 @@ const Chat_Sen = ({ navigation, route }) => {
   const { userdata } = route.params;
   const [message, setMessage] = useState('');
   const [thatImage, setThatImage] = useState();
+  const [displayName, setdisplayName] = useState();
+  const [realName, setrealName] = useState();
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
   const [socket, setSocket] = useState(null);
+  const [isFirst, setisFirst] = useState(route.params.first);
   const otherDetail = async () => {
     try {
       const included = userInfo.isprofileshown.includes(userdata._id);
@@ -41,16 +44,30 @@ const Chat_Sen = ({ navigation, route }) => {
           id: userdata._id
         })
         setThatImage(res.data.user.image.path)
+        setrealName(res.data.user.name)
         setReq(false)
       }
     } catch (error) {
       console.log(error)
     }
   }
+  const name = async () => {
+    if (!userdata?.displayName) {
+      try {
+        const res = await axios.post(API.USER.OTHER_PROFILE, {
+          id: userdata._id
+        })
+        setdisplayName(res.data.user.displayName)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
       otherDetail()
+      name()
     }, []),
   );
 
@@ -304,15 +321,19 @@ const Chat_Sen = ({ navigation, route }) => {
   }, [conversation]);
 
   const sendMessage = () => {
-    if (socketInstance && userInstance?.user?._id) {
-      socketInstance.emit('send-message', {
-        from: userInstance.user._id,
-        to: userdata._id,
-        message,
-      });
-      setMessage('');
+    if (isFirst) {
+      setModalVisible()
     } else {
-      console.error('Socket instance or user ID is missing');
+      if (message.length > 0 && socketInstance && userInstance?.user?._id) {
+        socketInstance.emit('send-message', {
+          from: userInstance.user._id,
+          to: userdata._id,
+          message,
+        });
+        setMessage('');
+      } else {
+        console.error('Socket instance or user ID is missing');
+      }
     }
   };
   const formatTime = (timestamp) => {
@@ -341,7 +362,7 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
-            <Image
+            {!req && <Image
               source={thatImage
                 ? { uri: thatImage } : require('../../assets/Images/Icons/Pro.png')}
               style={{
@@ -349,13 +370,14 @@ const Chat_Sen = ({ navigation, route }) => {
                 width: 50,
                 borderRadius: 100,
               }}
-            />
-            <Text style={styles.displayNameText}>{userdata?.displayName ? userdata?.displayName : userdata?.name}</Text>
+            />}
+            <Text style={styles.displayNameText}>{!req ? realName : userdata?.displayName ? userdata?.displayName : displayName}</Text>
           </View>
           {req && (
             <TouchableOpacity onPress={() => {
               // setModalVisible(true)
               sendProfileViewRequest()
+
             }} style={styles.profileRequestButton}>
               <Text style={styles.profileRequestText}>Profile Request</Text>
             </TouchableOpacity>
@@ -409,6 +431,40 @@ const Chat_Sen = ({ navigation, route }) => {
             style={styles.modalBackground}
           >
             <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Do you want to talk with {userdata?.displayName ? userdata?.displayName : userdata?.name} ?</Text>
+              {/* <Text style={styles.modalMessage}>
+                Amina Iqbal has sent you a request to view your profile details, including your display picture, name, and more.
+              </Text> */}
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.declineButton}
+                >
+                  <Text style={styles.modalActionText}>Decline</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={async () => {
+                    if (isFirst && userdata._id) {
+                      await AsyncStorage.setItem('ChatID', userdata._id)
+                      setModalVisible(false)
+                      setisFirst(false)
+                    }
+                  }}
+                  style={styles.allowButton}
+                >
+                  <Text style={styles.modalActionText}>Allow</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+            style={styles.modalBackground}
+          >
+            <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>Profile Request Received</Text>
               <Text style={styles.modalMessage}>
                 Amina Iqbal has sent you a request to view your profile details, including your display picture, name, and more.
@@ -432,9 +488,9 @@ const Chat_Sen = ({ navigation, route }) => {
               </View>
             </View>
           </TouchableOpacity>
-        </Modal>
+        </Modal> */}
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
@@ -529,6 +585,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'ABeeZee-Italic',
     alignSelf: 'center',
+    marginBottom: 20,
   },
   modalMessage: {
     color: '#000',

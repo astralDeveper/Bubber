@@ -35,6 +35,7 @@ const Message = ({ navigation }) => {
   const { userInstance, userInfo, setUserInfo } = useContext(SocketContext);
   const [notification, setNotification] = useState(false);
   const [requestsData, setRequestsData] = useState([]);
+  const [conersationId, setconersationId] = useState([]);
   console.log(userInfo._id, userInfo.name)
   const Get_cons = async () => {
     try {
@@ -51,6 +52,10 @@ const Message = ({ navigation }) => {
           },
         );
         setConData(sortedByLastMessageTimestamp);
+
+        // console.log("COdata======>",conersationId)
+
+
       }
     } catch (error) {
       console.log('error', error);
@@ -60,9 +65,12 @@ const Message = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       Get_cons();
+      noti()
     }, []),
   );
-
+  // if (idsArray.includes(savedId)) {
+  //   alert("ID matched!");
+  // }
   const [modalVisible, setModalVisible] = useState(false);
 
   let getLatestMessage = messages => {
@@ -71,12 +79,24 @@ const Message = ({ navigation }) => {
     });
     return latestMessage;
   };
-  const ProById = async () => {
+  // const ProById = async () => {
+  //   try {
+  //     const id = { id: userInfo._id }
+  //     const response = await axios.post(`${API.USER.REQUEST_VIEW}`, id)
+  //     setRequestsData(response.data.data);
+  //     setNotification(true);
+  //   } catch (error) {
+  //     console.error(
+  //       'Error',
+  //       error,
+  //     );
+  //   }
+  // };
+  const noti = async () => {
     try {
       const id = { id: userInfo._id }
       const response = await axios.post(`${API.USER.REQUEST_VIEW}`, id)
       setRequestsData(response.data.data);
-      setNotification(true);
     } catch (error) {
       console.error(
         'Error',
@@ -84,6 +104,8 @@ const Message = ({ navigation }) => {
       );
     }
   };
+
+
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -130,13 +152,13 @@ const Message = ({ navigation }) => {
               }}>
               Chat
             </Text>
-
             <TouchableOpacity
-              onPress={ProById}
+              onPress={() => setNotification(true)}
               style={{
                 backgroundColor: '#8e8e8e',
                 padding: 5,
                 borderRadius: 5,
+                flexDirection: 'row',
               }}>
               <Text
                 style={{
@@ -144,6 +166,23 @@ const Message = ({ navigation }) => {
                 }}>
                 Notification
               </Text>
+              <View style={{
+                height: 20,
+                width: 20,
+                borderRadius: 10,
+                backgroundColor: 'red',
+                position: 'absolute',
+                right: "-5%",
+                top: "-30%",
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Text style={{
+                  color: 'black', fontSize: 12
+                }}>
+                  {requestsData.length}
+                </Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -173,6 +212,7 @@ const Message = ({ navigation }) => {
             }}>
             {conData?.map((item, userIndex) =>
               item.participants.map((user, index) => (
+                // console.log("Hellosdf=====>",user?.isprofileshown),
                 <Fragment key={index}>
                   {user?._id !== userInstance?.user?._id ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
@@ -180,7 +220,7 @@ const Message = ({ navigation }) => {
                         onPress={async () => {
                           if (userIndex == 0) {
                             navigation.navigate('Chat_Sen', {
-                              userdata: user,
+                              userdata: user, isFirst: false
                             });
                           } else setModalVisible(true);
                         }}
@@ -219,12 +259,20 @@ const Message = ({ navigation }) => {
                                 fontFamily: 'ABeeZee-Italic',
                                 width: width * 0.4,
                               }}>
-                              {user?.name}
+                              {/* {user?.name} */}
+                              {
+                                user?.isprofileshown?.includes(userInstance?.user?._id)
+                                  ? user?.realName
+                                  : user?.displayName
+                                // null
+                                // user?.name 
+                              }
+
                             </Text>
                           </View>
                         </View>
                         <View>
-                          <Text>{formatTime(item.lastMessageTimestamp)}</Text>
+                          <Text style={{ color: 'black' }}>{formatTime(item.lastMessageTimestamp)}</Text>
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -320,6 +368,15 @@ const Message = ({ navigation }) => {
           <TouchableOpacity
             activeOpacity={1}
             style={styles.modalContainer}>
+            <Text style={{
+              color: '#000',
+              fontSize: 18,
+              fontFamily: 'ABeeZee-Italic',
+              alignSelf: 'center',
+              textAlign: 'center',
+            }}>
+              Profile Request List
+            </Text>
             <FlatList
               contentContainerStyle={{
                 gap: 10
@@ -372,7 +429,7 @@ const RenderItem = ({ item, userId, setNotification, setUserInfo }) => (
       onPress={async () => {
         const res = await axios.post(API.USER.ACCEPT_PROFILE,
           {
-            userid: userId,
+            requesterId: userId,
             targetUserId: item._id
           }
         )
@@ -410,7 +467,7 @@ const styles = StyleSheet.create({
   allowButton: {
     backgroundColor: '#3EC8BF',
     padding: 8,
-    width: width * 0.15,
+    width: width * 0.25,
     alignItems: 'center',
     borderRadius: 10,
   },
