@@ -52,10 +52,6 @@ const Message = ({ navigation }) => {
           },
         );
         setConData(sortedByLastMessageTimestamp);
-
-        // console.log("COdata======>",conersationId)
-
-
       }
     } catch (error) {
       console.log('error', error);
@@ -66,7 +62,7 @@ const Message = ({ navigation }) => {
     useCallback(() => {
       Get_cons();
       noti()
-    }, []),
+    }, [notification]),
   );
   // if (idsArray.includes(savedId)) {
   //   alert("ID matched!");
@@ -212,7 +208,7 @@ const Message = ({ navigation }) => {
             }}>
             {conData?.map((item, userIndex) =>
               item.participants.map((user, index) => (
-                console.log("Hellosdf=====>",user),
+                console.log("Hellosdf=====>", user),
                 <Fragment key={index}>
                   {user?._id !== userInstance?.user?._id ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
@@ -241,10 +237,10 @@ const Message = ({ navigation }) => {
                           }}>
                           <Image
                             source={
-                              user?.isprofileshown?.find(id => id === userInstance?.user?._id)?
-                              { uri: user?.image?.path }
-                               :
-                              require('../../assets/Images/Icons/Sugp.png')}
+                              user?.isprofileshown?.find(id => id === userInstance?.user?._id) ?
+                                { uri: user?.image?.path }
+                                :
+                                require('../../assets/Images/Icons/Sugp.png')}
                             style={{
                               height: 60,
                               width: 60,
@@ -432,7 +428,7 @@ const RenderItem = ({ item, userId, setNotification, setUserInfo }) => (
       onPress={async () => {
         const res = await axios.post(API.USER.ACCEPT_PROFILE,
           {
-            requesterId: userId,
+            accepterID: userId,
             targetUserId: item._id
           }
         )

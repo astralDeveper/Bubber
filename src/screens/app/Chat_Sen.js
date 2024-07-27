@@ -27,11 +27,11 @@ const Chat_Sen = ({ navigation, route }) => {
   const { socketInstance, userInstance, userInfo } = useContext(SocketContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [req, setReq] = useState(true);
+  const [request, setRequest] = useState(true);
   const { userdata } = route.params;
   const [message, setMessage] = useState('');
   const [thatImage, setThatImage] = useState();
-  const [displayName, setdisplayName] = useState();
-  const [realName, setrealName] = useState();
+  const [name, setName] = useState(userdata.displayName);
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
   const [socket, setSocket] = useState(null);
@@ -43,31 +43,25 @@ const Chat_Sen = ({ navigation, route }) => {
         const res = await axios.post(API.USER.OTHER_PROFILE, {
           id: userdata._id
         })
+        if (res.data.user.isprofileshown.includes(userInfo._id)) setRequest(false)
         setThatImage(res.data.user.image.path)
-        setrealName(res.data.user.name)
+        setName(res.data.user.name)
         setReq(false)
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  const name = async () => {
-    if (!userdata?.displayName) {
-      try {
+      } else {
         const res = await axios.post(API.USER.OTHER_PROFILE, {
           id: userdata._id
         })
-        setdisplayName(res.data.user.displayName)
-      } catch (error) {
-        console.log(error)
+        if (res.data.user.isprofileshown.includes(userInfo._id)) setRequest(false)
+        else setRequest(true)
       }
+    } catch (error) {
+      console.log(error)
     }
   }
 
   useFocusEffect(
     useCallback(() => {
       otherDetail()
-      name()
     }, []),
   );
 
@@ -350,6 +344,8 @@ const Chat_Sen = ({ navigation, route }) => {
     return (timeString);
   };
 
+  console.log('userdata._id=====>',userdata._id)
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -362,18 +358,18 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
-            {!req && <Image
-              source={thatImage
+            <Image
+              source={req ? require('../../assets/Images/Icons/Sugp.png') : thatImage
                 ? { uri: thatImage } : require('../../assets/Images/Icons/Pro.png')}
               style={{
                 height: 50,
                 width: 50,
                 borderRadius: 100,
               }}
-            />}
-            <Text style={styles.displayNameText}>{!req ? realName : userdata?.displayName ? userdata?.displayName : displayName}</Text>
+            />
+            <Text style={styles.displayNameText}>{!req ? name : userdata?.displayName}</Text>
           </View>
-          {req && (
+          {request && (
             <TouchableOpacity onPress={() => {
               // setModalVisible(true)
               sendProfileViewRequest()
@@ -397,7 +393,6 @@ const Chat_Sen = ({ navigation, route }) => {
                 },
               ]}
             >
-              {console.log(item.date)}
               <Text style={[
                 styles.messageText,
                 { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
@@ -444,10 +439,26 @@ const Chat_Sen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={async () => {
-                    if (isFirst && userdata._id) {
-                      await AsyncStorage.setItem('ChatID', userdata._id)
-                      setModalVisible(false)
-                      setisFirst(false)
+                    try {
+
+                      if (isFirst && userdata._id) {
+                        // const data = await AsyncStorage.getItem('user');
+                        // const parsedData = JSON.parse(data);
+                        // const token = parsedData.token;
+                        // const res = await axios.post(API.USER.CONVERSATIONS_START, {
+                        //   participantId: userdata._id
+                        // },
+                        //   {
+                        //     headers: {
+                        //       Authorization: token
+                        //     }
+                        //   });
+                        // await AsyncStorage.setItem('ChatID', userdata._id)
+                        // setModalVisible(false)
+                        // setisFirst(false)
+                      }
+                    } catch (error) {
+                      console.log(error)
                     }
                   }}
                   style={styles.allowButton}

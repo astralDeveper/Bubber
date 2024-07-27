@@ -84,8 +84,6 @@ const Suggestion = ({ navigation }) => {
   };
 
   const handleModalConfirm = async () => {
-    // if (pendingChatID) await AsyncStorage.setItem('ChatID', pendingChatID)
-    setSelectedChatID(pendingChatID);
     setModalVisible(false);
     setpendingChatID(null);
     navigation.navigate('Chat_Sen', { userdata: chatUserData, first: true });

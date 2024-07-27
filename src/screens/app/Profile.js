@@ -40,7 +40,7 @@ const Profile = ({ navigation }) => {
   }, []);
   const [dToken, setDToken] = useState();
 
-  const [dName, setDName] = useState(userInfo.name);
+  const [dName, setDName] = useState(userInfo.displayName);
   const [rName, setRName] = useState(userInfo.realName);
   const [email, setEmail] = useState(userInfo.email);
   const [pvide, setpvide] = useState(null);
@@ -72,21 +72,10 @@ const Profile = ({ navigation }) => {
         },
       })
       .then(res => {
-        console.log(res?.data);
+        console.log('res?.data',res?.data.user);
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
-          "address": addd,
-          "displayName": dName,
-          "email": email,
-          "phone": pho,
-          "realName": rName,
-          ...(pvide && {
-            "image": {
-              "filename": pvide.fileName,
-              "mimetype": pvide.type,
-              "path": pvide.uri
-            }
-          })
+          ...res?.data.user
         }));
 
         alert('Data Updated Successfully');

@@ -1,6 +1,6 @@
 
 // export const BASE_URL = 'http://192.168.100.37:3000';
-export const BASE_URL = 'http://192.168.100.61:3000';
+export const BASE_URL = 'http://192.168.100.21:3000';
 // export const BASE_URL = 'https://chatting-app-backend-rw5k.onrender.com';
 
 
@@ -20,6 +20,7 @@ export const API = {
     ACCEPT_PROFILE: `${BASE_URL}/auth/profile-view-request/accept`,  //targetUserId
     REQUEST_VIEW: `${BASE_URL}/auth/get-Profileforrequest`,
     OTHER_PROFILE: `${BASE_URL}/auth/other-profile`,
+    CONVERSATIONS_START: `${BASE_URL}/auth/conversations/start`,
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };
