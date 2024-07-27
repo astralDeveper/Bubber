@@ -22,7 +22,9 @@ const Splash = ({ navigation }) => {
           })
           .then(res => {
             setUserInfo(res.data.user);
-          });
+          }).catch(error => {
+            navigation.replace('Welcome');
+          })
         let user = await JSON.parse(data);
         setUserInstance(user);
         navigation.replace('BottomTabs');

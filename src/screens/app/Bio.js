@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Keyboard,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Appl,
   Appl_B,
@@ -22,12 +22,14 @@ import {
   Male,
   Up_A,
 } from '../../assets/Images';
-import {Image} from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
+import { Image } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import axios from 'axios';
 import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const Bio = ({navigation}) => {
+import { SocketContext } from '../../context/SocketContext';
+const Bio = ({ navigation }) => {
+  const { setUserInfo } = useContext(SocketContext);
   const [selectedGender, setSelectedGender] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const handleSelectGender = gender => {
@@ -39,10 +41,10 @@ const Bio = ({navigation}) => {
     // setModalVisible(true);
   };
   const [pivid, setpivid] = useState('');
-  const[dName,setDName]=useState()
-  const[rName,setRName]=useState()
-  const[age,setAge]=useState()
-  const[dtoken,setDToken]=useState()
+  const [dName, setDName] = useState()
+  const [rName, setRName] = useState()
+  const [age, setAge] = useState()
+  const [dtoken, setDToken] = useState()
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,7 +52,7 @@ const Bio = ({navigation}) => {
         if (data) {
           const parsedData = JSON.parse(data);
           const token = parsedData.token;
-        
+
           setDToken(token)
         } else {
           console.log("No data found");
@@ -90,10 +92,10 @@ const Bio = ({navigation}) => {
           if (mediaType.startsWith('image/')) {
             // It's an image
             // let imageUri = pickedMedia.uri;
-            let source={
-              uri:response.assets[0]?.uri,
-              type:response.assets[0]?.type,
-              name:response.assets[0]?.fileName
+            let source = {
+              uri: response.assets[0]?.uri,
+              type: response.assets[0]?.type,
+              name: response.assets[0]?.fileName
             }
             setpivid(source);
             // console.log('first', response.assets[0]?.uri);
@@ -116,7 +118,7 @@ const Bio = ({navigation}) => {
     formData.append('gender', selectedGender);
     formData.append('language', 'english');
     formData.append('age', age);
-  
+
     try {
       const response = await axios.post(API.USER.C_PROFILE, formData, {
         headers: {
@@ -126,14 +128,23 @@ const Bio = ({navigation}) => {
       });
       console.log("Res", response?.data);
       if (response?.data?.message === "Profile Created Successfully") {
-        alert("Profile Created Successfully")
-        navigation.navigate("Interset")
+        await axios
+          .get(API.USER.PROFILE_DATA, {
+            headers: {
+              Authorization: dtoken,
+            },
+          })
+          .then(res => {
+            setUserInfo(res.data.user);
+            alert("Profile Created Successfully")
+            navigation.navigate("Interset");
+          })
       }
     } catch (error) {
       console.log(error);
     }
   }
-  
+
   return (
     <SafeAreaView
       style={{
@@ -162,7 +173,7 @@ const Bio = ({navigation}) => {
               justifyContent: 'space-between',
               marginTop: height * 0.02,
             }}>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
             <View
               style={{
                 width: width * 0.58,
@@ -186,7 +197,7 @@ const Bio = ({navigation}) => {
                 Create your Bio Data
               </Text>
             </View>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
           </View>
           <View
             style={{
@@ -217,8 +228,8 @@ const Bio = ({navigation}) => {
             <Image
               source={
                 pivid
-                  ? {uri: pivid?.uri}
-                  : 
+                  ? { uri: pivid?.uri }
+                  :
                   require('../../assets/Images/Icons/Propic.png')
               }
               style={{
@@ -253,7 +264,7 @@ const Bio = ({navigation}) => {
               placeholder="Jhon Abrahm"
               placeholderTextColor={'#000'}
               value={dName}
-              onChangeText={(text)=>{setDName(text)}}
+              onChangeText={(text) => { setDName(text) }}
               style={{
                 borderBottomWidth: 1,
                 borderColor: '#5F5F5F',
@@ -277,8 +288,8 @@ const Bio = ({navigation}) => {
               Real Name
             </Text>
             <TextInput
-            value={rName}
-            onChangeText={(text)=>{setRName(text)}}
+              value={rName}
+              onChangeText={(text) => { setRName(text) }}
               placeholder="James Willson"
               placeholderTextColor={'#000'}
               style={{
@@ -304,8 +315,8 @@ const Bio = ({navigation}) => {
               Age
             </Text>
             <TextInput
-            value={age}
-            onChangeText={(text)=>{setAge(text)}}
+              value={age}
+              onChangeText={(text) => { setAge(text) }}
               placeholder="21"
               placeholderTextColor={'#000'}
               keyboardType="number-pad"
@@ -397,7 +408,7 @@ const Bio = ({navigation}) => {
                     onPress={() => handleSelectGender('Male')}>
                     <Male />
                     <Text style={styles.optionText}>Male</Text>
-                    <View style={{width: 10}}></View>
+                    <View style={{ width: 10 }}></View>
                   </TouchableOpacity>
                   <View
                     style={{
@@ -412,7 +423,7 @@ const Bio = ({navigation}) => {
                     onPress={() => handleSelectGender('Female')}>
                     <Female />
                     <Text style={styles.optionText}>Female</Text>
-                    <View style={{width: 10}}></View>
+                    <View style={{ width: 10 }}></View>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -423,7 +434,7 @@ const Bio = ({navigation}) => {
     </SafeAreaView>
   );
 };
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   modalBackground: {
     // flex: 1,

@@ -212,7 +212,7 @@ const Message = ({ navigation }) => {
             }}>
             {conData?.map((item, userIndex) =>
               item.participants.map((user, index) => (
-                // console.log("Hellosdf=====>",user?.isprofileshown),
+                console.log("Hellosdf=====>",user),
                 <Fragment key={index}>
                   {user?._id !== userInstance?.user?._id ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
@@ -240,8 +240,10 @@ const Message = ({ navigation }) => {
                             justifyContent: 'space-between',
                           }}>
                           <Image
-                            source={user?.image?.path ?
-                              { uri: user?.image?.path } :
+                            source={
+                              user?.isprofileshown?.find(id => id === userInstance?.user?._id)?
+                              { uri: user?.image?.path }
+                               :
                               require('../../assets/Images/Icons/Sugp.png')}
                             style={{
                               height: 60,
@@ -261,9 +263,10 @@ const Message = ({ navigation }) => {
                               }}>
                               {/* {user?.name} */}
                               {
-                                user?.isprofileshown?.includes(userInstance?.user?._id)
+                                user?.isprofileshown?.find(id => id === userInstance?.user?._id)
                                   ? user?.realName
                                   : user?.displayName
+
                                 // null
                                 // user?.name 
                               }
