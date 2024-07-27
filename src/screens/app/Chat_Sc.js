@@ -36,7 +36,6 @@ const Message = ({ navigation }) => {
   const [notification, setNotification] = useState(false);
   const [requestsData, setRequestsData] = useState([]);
   const [conersationId, setconersationId] = useState([]);
-  console.log(userInfo._id, userInfo.name)
   const Get_cons = async () => {
     try {
       const res = await axios.get(API.USER.GET_CONVERSATIONS, {

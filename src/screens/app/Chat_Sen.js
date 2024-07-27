@@ -354,13 +354,13 @@ const Chat_Sen = ({ navigation, route }) => {
                   onPress={async () => {
                     try {
                       if (isFirst && userdata._id) {
-                        // const data = await AsyncStorage.getItem('user');
-                        // const parsedData = JSON.parse(data);
-                        // const token = parsedData.token;
-                        // const res = await axios.post(API.USER.CONVERSATIONS_START, {
-                        //   participantId: userdata._id,
-                        //   userID: userInfo._id
-                        // });
+                        const data = await AsyncStorage.getItem('user');
+                        const parsedData = JSON.parse(data);
+                        const token = parsedData.token;
+                        const res = await axios.post(API.USER.CONVERSATIONS_START, {
+                          participantId: userdata._id,
+                          userID: userInfo._id
+                        });
                         await AsyncStorage.setItem('ChatID', userdata._id)
                         setModalVisible(false)
                         setisFirst(false)
@@ -377,37 +377,7 @@ const Chat_Sen = ({ navigation, route }) => {
             </View>
           </TouchableOpacity>
         </Modal>
-        {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={() => setModalVisible(false)}
-            style={styles.modalBackground}
-          >
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Profile Request Received</Text>
-              <Text style={styles.modalMessage}>
-                Amina Iqbal has sent you a request to view your profile details, including your display picture, name, and more.
-              </Text>
-              <View style={styles.modalActions}>
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.declineButton}
-                >
-                  <Text style={styles.modalActionText}>Decline</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setModalVisible(false);
-                    grantProfileViewRequest()
-                  }}
-                  style={styles.allowButton}
-                >
-                  <Text style={styles.modalActionText}>Allow</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </Modal> */}
+        
       </View>
     </SafeAreaView >
   );
@@ -540,3 +510,35 @@ const styles = StyleSheet.create({
 });
 
 export default Chat_Sen;
+
+{/* <Modal transparent={true} visible={modalVisible} animationType="slide">
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)}
+            style={styles.modalBackground}
+          >
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Profile Request Received</Text>
+              <Text style={styles.modalMessage}>
+                Amina Iqbal has sent you a request to view your profile details, including your display picture, name, and more.
+              </Text>
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.declineButton}
+                >
+                  <Text style={styles.modalActionText}>Decline</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalVisible(false);
+                    grantProfileViewRequest()
+                  }}
+                  style={styles.allowButton}
+                >
+                  <Text style={styles.modalActionText}>Allow</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal> */}
