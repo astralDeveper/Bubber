@@ -119,7 +119,7 @@ const Signup = ({ navigation }) => {
                   position: 'absolute',
                   bottom: 5,
                 }}>
-                Log in to Bubber
+                Sign in to Bubber
               </Text>
             </View>
             <View style={{ width: 10 }}></View>
