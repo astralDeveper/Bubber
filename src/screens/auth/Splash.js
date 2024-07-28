@@ -8,31 +8,36 @@ import { API } from '../Api';
 const Splash = ({ navigation }) => {
   const { setUserInstance, setUserInfo } = useContext(SocketContext);
   const isAuth = async () => {
-    const data = await AsyncStorage.getItem('user');
-    const parsedData = JSON.parse(data);
-    setTimeout(async () => {
-      if (data) {
-        const token = parsedData.token;
-        console.log(token)
-        await axios
-          .get(API.USER.PROFILE_DATA, {
-            headers: {
-              Authorization: token,
-            },
-          })
-          .then(res => {
+    try {
+      const data = await AsyncStorage.getItem('user');
+      const parsedData = JSON.parse(data);
+      const token = parsedData.token;
+      
+      setTimeout(async () => {
+        try {
+          if (token) {
+            const res = await axios.get(API.USER.PROFILE_DATA, {
+              headers: {
+                Authorization: token,
+              },
+            });
             setUserInfo(res.data.user);
-          }).catch(error => {
+            let user = JSON.parse(data);
+            setUserInstance(user);
+            navigation.replace('BottomTabs');
+          } else {
             navigation.replace('Welcome');
-          })
-        let user = await JSON.parse(data);
-        setUserInstance(user);
-        navigation.replace('BottomTabs');
-      } else {
-        navigation.replace('Welcome');
-      }
-    }, 2000);
+          }
+        } catch (error) {
+          navigation.replace('Welcome');
+        }
+      }, 2000);
+      
+    } catch (error) {
+      navigation.replace('Welcome');
+    }
   };
+  
   useEffect(() => {
     isAuth();
   }, []);

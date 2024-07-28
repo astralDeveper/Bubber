@@ -35,7 +35,8 @@ const Message = ({ navigation }) => {
   const { userInstance, userInfo, setUserInfo } = useContext(SocketContext);
   const [notification, setNotification] = useState(false);
   const [requestsData, setRequestsData] = useState([]);
-  const [conersationId, setconersationId] = useState([]);
+  const [conersationId, setconersationId] = useState();
+
   const Get_cons = async () => {
     try {
       const res = await axios.get(API.USER.GET_CONVERSATIONS, {
@@ -51,16 +52,39 @@ const Message = ({ navigation }) => {
           },
         );
         setConData(sortedByLastMessageTimestamp);
+
+        const chatID = await AsyncStorage.getItem('ChatID')
+        setconersationId(chatID)
+
       }
     } catch (error) {
       console.log('error', error);
     }
   };
+  const conversationPerson = async () => {
+    try {
+
+      const res = await axios.post(API.USER.GET_CONVERSATIONS_ID, {
+        id: userInfo.activeConversation
+      },
+        {
+          headers: {
+            Authorization: userInstance?.token
+          }
+        });
+      console.log('res===>> converstaoin', res.data)
+    } catch (error) {
+
+      console.log('error===>> converstaoin', error)
+    }
+  }
+
 
   useFocusEffect(
     useCallback(() => {
       Get_cons();
       noti()
+      conversationPerson()
     }, [notification]),
   );
   // if (idsArray.includes(savedId)) {
@@ -116,7 +140,7 @@ const Message = ({ navigation }) => {
     return (timeString);
   };
 
-
+  console.log('res.data.user', userInfo)
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#3EC8BF' }}>
       <ScrollView>
@@ -213,7 +237,7 @@ const Message = ({ navigation }) => {
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
                       <TouchableOpacity
                         onPress={async () => {
-                          if (userIndex == 0) {
+                          if (user._id == conersationId) {
                             navigation.navigate('Chat_Sen', {
                               userdata: user, isFirst: false, conversationid: item._id
                             });
@@ -236,7 +260,7 @@ const Message = ({ navigation }) => {
                           }}>
                           <Image
                             source={
-                              user?.isprofileshown?.find(id => id === userInstance?.user?._id) ?
+                              userInfo?.isprofileshown?.find(id => id === conersationId) ?
                                 { uri: user?.image?.path }
                                 :
                                 require('../../assets/Images/Icons/Sugp.png')}
@@ -251,14 +275,14 @@ const Message = ({ navigation }) => {
                               numberOfLines={1}
                               ellipsizeMode={'tail'}
                               style={{
-                                color: userIndex == 0 ? '#000' : '#d3d3d3',
+                                color: user._id == conersationId ? '#000' : '#d3d3d3',
                                 fontSize: 20,
                                 fontFamily: 'ABeeZee-Italic',
                                 width: width * 0.4,
                               }}>
                               {/* {user?.name} */}
                               {
-                                user?.isprofileshown?.find(id => id === userInstance?.user?._id)
+                                userInfo?.isprofileshown?.find(id => id == conersationId)
                                   ? user?.realName
                                   : user?.displayName
 
@@ -384,8 +408,8 @@ const Message = ({ navigation }) => {
                 width: "100%",
                 height: 200,
                 backgroundColor: 'white',
-                justifyContent:'center',
-                alignItems:'center'
+                justifyContent: 'center',
+                alignItems: 'center'
               }}>
                 <Text style={{
                   color: '#000',

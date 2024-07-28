@@ -10,7 +10,7 @@
 //   // }
 // }}
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import {
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../Api';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('window');
 
@@ -36,27 +37,31 @@ const Suggestion = ({ navigation }) => {
   const [selectedChatID, setSelectedChatID] = useState(null);
   const [pendingChatID, setpendingChatID] = useState(null);
   const [chatUserData, setChatUserData] = useState();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AsyncStorage.getItem('user');
-        const chatID = await AsyncStorage.getItem('ChatID');
-        setSelectedChatID(chatID)
-        if (data) {
-          const parsedData = JSON.parse(data);
-          const token = parsedData.token;
-          setDToken(token);
-          getSuggestions(token);
-        } else {
-          console.log('No data found');
-        }
-      } catch (error) {
-        console.error('Error retrieving data', error);
-      }
-    };
 
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('user');
+      const chatID = await AsyncStorage.getItem('ChatID');
+      setSelectedChatID(chatID)
+      if (data) {
+        const parsedData = JSON.parse(data);
+        const token = parsedData.token;
+        setDToken(token);
+        getSuggestions(token);
+      } else {
+        console.log('No data found');
+      }
+    } catch (error) {
+      console.error('Error retrieving data', error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData()
+    }, []),
+  );
+
 
   const getSuggestions = async token => {
     try {
@@ -66,7 +71,7 @@ const Suggestion = ({ navigation }) => {
         },
       });
       setUData(res?.data?.suggestions);
-      console.log('res?.data?.suggestions',res?.data?.suggestions)
+      console.log('res?.data?.suggestions', res?.data?.suggestions)
     } catch (error) {
       console.log('error', error);
     }

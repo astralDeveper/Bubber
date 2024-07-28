@@ -207,7 +207,7 @@ const Profile = ({ navigation }) => {
                 <Image
                   source={imge ?
                     { uri: imge }
-                    : require('../../assets/Images/Icons/Pro.png')
+                    : require('../../assets/Images/Icons/Sugp.png')
                   }
                   style={{
                     height: height * 0.15,

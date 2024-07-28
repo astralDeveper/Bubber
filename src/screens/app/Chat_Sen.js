@@ -24,7 +24,7 @@ const { height, width } = Dimensions.get('window');
 
 const Chat_Sen = ({ navigation, route }) => {
 
-  const { socketInstance, userInstance, userInfo } = useContext(SocketContext);
+  const { socketInstance, userInstance, userInfo, setUserInfo } = useContext(SocketContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [req, setReq] = useState(true);
   const [request, setRequest] = useState(true);
@@ -34,8 +34,9 @@ const Chat_Sen = ({ navigation, route }) => {
   const [name, setName] = useState(userdata.displayName);
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
-  const [socket, setSocket] = useState(null);
+  const [precipitant, setPrecipitant] = useState();
   const [isFirst, setisFirst] = useState(route.params.first);
+
   const otherDetail = async () => {
     try {
       const included = userInfo.isprofileshown.includes(userdata._id);
@@ -53,11 +54,27 @@ const Chat_Sen = ({ navigation, route }) => {
         })
         if (res.data.user.isprofileshown.includes(userInfo._id)) setRequest(false)
         else setRequest(true)
+        setPrecipitant(res.data.user)
       }
     } catch (error) {
       console.log(error)
     }
   }
+  const chatHandler = async () => {
+    try {
+      const res = await axios.post(API.USER.OTHER_PROFILE, {
+        id: userdata._id
+      })
+      setPrecipitant(res.data.user)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    chatHandler()
+  }, [modalVisible])
+
 
   useFocusEffect(
     useCallback(() => {
@@ -228,11 +245,9 @@ const Chat_Sen = ({ navigation, route }) => {
       scrollViewRef.current.scrollToEnd({ animated: false });
     }
   }, [conversation]);
-
+  console.log('userInfo?.activeConversation == precipitant?.activeConversation', userInfo?.activeConversation, precipitant?.activeConversation)
   const sendMessage = () => {
-    if (isFirst) {
-      setModalVisible()
-    } else {
+    if (userInfo.activeConversation != 'false' && userInfo?.activeConversation == precipitant?.activeConversation) {
       if (message.length > 0 && socketInstance && userInstance?.user?._id) {
         socketInstance.emit('send-message', {
           from: userInstance.user._id,
@@ -243,7 +258,7 @@ const Chat_Sen = ({ navigation, route }) => {
       } else {
         console.error('Socket instance or user ID is missing');
       }
-    }
+    } else setModalVisible(true)
   };
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -258,7 +273,6 @@ const Chat_Sen = ({ navigation, route }) => {
     const timeString = date.toLocaleTimeString('en-US', options);
     return (timeString);
   };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -280,7 +294,7 @@ const Chat_Sen = ({ navigation, route }) => {
                 borderRadius: 100,
               }}
             />
-            <Text style={styles.displayNameText}>{!req ? name : userdata?.displayName}</Text>
+            <Text style={styles.displayNameText}>{request ? name : userdata?.displayName}</Text>
           </View>
           {request && (
             <TouchableOpacity onPress={() => {
@@ -291,47 +305,54 @@ const Chat_Sen = ({ navigation, route }) => {
               <Text style={styles.profileRequestText}>Profile Request</Text>
             </TouchableOpacity>
           )}
+
         </View>
+
         <ScrollView ref={scrollViewRef}>
-          {conversation?.messages?.map((item, index) => (
-            <View
-              key={index}
-              style={[
-                styles.messageBubble,
-                {
-                  backgroundColor: item?.sender === userInstance?.user?._id ? '#20A090' : '#F2F7FB',
-                  alignSelf: item?.sender === userInstance?.user?._id ? 'flex-end' : 'flex-start',
-                  borderTopRightRadius: item?.sender === userInstance?.user?._id ? 0 : 10,
-                  borderTopLeftRadius: item?.sender === userInstance?.user?._id ? 10 : 0,
-                },
-              ]}
-            >
-              <Text style={[
-                styles.messageText,
-                { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
-              ]}>
-                {item?.content}
-              </Text>
-              <Text style={styles.timestamp}>{formatTime(item.date)}</Text>
-            </View>
-          ))}
+          <>
+            {conversation?.messages?.map((item, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.messageBubble,
+                  {
+                    backgroundColor: item?.sender === userInstance?.user?._id ? '#20A090' : '#F2F7FB',
+                    alignSelf: item?.sender === userInstance?.user?._id ? 'flex-end' : 'flex-start',
+                    borderTopRightRadius: item?.sender === userInstance?.user?._id ? 0 : 10,
+                    borderTopLeftRadius: item?.sender === userInstance?.user?._id ? 10 : 0,
+                  },
+                ]}
+              >
+                <Text style={[
+                  styles.messageText,
+                  { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
+                ]}>
+                  {item?.content}
+                </Text>
+                <Text style={styles.timestamp}>{formatTime(item.date)}</Text>
+              </View>
+            ))}
+          </>
         </ScrollView>
-        <View style={styles.inputContainer}>
-          <TextInput
-            multiline
-            placeholder="Write your message"
-            placeholderTextColor={'#797C7B'}
-            value={message}
-            onChangeText={setMessage}
-            style={styles.textInput}
-          />
-          <TouchableOpacity onPress={grantProfileViewRequest}>
-            <Clip />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={sendMessage}>
-            <Send />
-          </TouchableOpacity>
-        </View>
+        {userInfo?.activeConversation == 'false' ?
+          <Message onPress={sendMessage} /> :
+          userInfo?.activeConversation != precipitant?.activeConversation ?
+            <Message onPress={sendMessage} /> : <View style={styles.inputContainer}>
+              <TextInput
+                multiline
+                placeholder="Write your message"
+                placeholderTextColor={'#797C7B'}
+                value={message}
+                onChangeText={setMessage}
+                style={styles.textInput}
+              />
+              <TouchableOpacity onPress={grantProfileViewRequest}>
+                <Clip />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={sendMessage}>
+                <Send />
+              </TouchableOpacity>
+            </View>}
         <Modal transparent={true} visible={modalVisible} animationType="slide">
           <TouchableOpacity
             activeOpacity={1}
@@ -352,23 +373,22 @@ const Chat_Sen = ({ navigation, route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={async () => {
-                    try {
-                      if (isFirst && userdata._id) {
-                        const data = await AsyncStorage.getItem('user');
-                        const parsedData = JSON.parse(data);
-                        const token = parsedData.token;
-                        const res = await axios.post(API.USER.CONVERSATIONS_START, {
-                          participantId: userdata._id,
-                          userID: userInfo._id
-                        });
-                        await AsyncStorage.setItem('ChatID', userdata._id)
-                        setModalVisible(false)
-                        setisFirst(false)
-                      }
-                    } catch (error) {
-                      console.log(error)
+                    let generatedID;
+                    if (userInfo._id > userdata._id) {
+                      generatedID = userInfo._id + userdata._id;
+                    } else {
+                      generatedID = userdata._id + userInfo._id;
                     }
-                  }}
+                    const res = await axios.put(API.USER.START_CONVERSATION, {
+                      userId: userInfo._id,
+                      targetId: generatedID
+                    });
+                    await AsyncStorage.setItem('ChatID', userdata._id)
+                    setUserInfo(res.data.user)
+                    setModalVisible(false)
+                    setisFirst(false)
+                  }
+                  }
                   style={styles.allowButton}
                 >
                   <Text style={styles.modalActionText}>Allow</Text>
@@ -377,7 +397,6 @@ const Chat_Sen = ({ navigation, route }) => {
             </View>
           </TouchableOpacity>
         </Modal>
-        
       </View>
     </SafeAreaView >
   );
@@ -510,6 +529,24 @@ const styles = StyleSheet.create({
 });
 
 export default Chat_Sen;
+
+const Message = ({ onPress }) => (
+  <TouchableOpacity
+    onPress={() => onPress && onPress()}
+    activeOpacity={0.8}
+    style={{
+      alignSelf: 'center',
+      padding: 10,
+      borderRadius: 20,
+      marginVertical: 10,
+      backgroundColor: 'rgba(0,0,0,0.2)'
+    }}>
+    <Text style={{
+      color: 'black'
+    }}>This person already chat with other person.</Text>
+  </TouchableOpacity>
+)
+
 
 {/* <Modal transparent={true} visible={modalVisible} animationType="slide">
           <TouchableOpacity
