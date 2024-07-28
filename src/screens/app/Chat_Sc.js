@@ -262,8 +262,8 @@ const Message = ({ navigation }) => {
                           <Image
                             source={
                               userInfo?.isprofileshown?.find(id => id === conersationId) ?
-                                { uri: user?.image?.path }
-                                :
+                                user?.image?.path ? { uri: user?.image?.path } :
+                                  require('../../assets/Images/Icons/Sugp.png') :
                                 require('../../assets/Images/Icons/Sugp.png')}
                             style={{
                               height: 60,
