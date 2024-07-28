@@ -174,34 +174,35 @@ const Message = ({ navigation }) => {
             <TouchableOpacity
               onPress={() => setNotification(true)}
               style={{
-                backgroundColor: '#8e8e8e',
                 padding: 5,
                 borderRadius: 5,
                 flexDirection: 'row',
               }}>
-              <Text
+              <Image
                 style={{
-                  color: '#FFF',
+                  height: 30,
+                  width: 30,
+                  tintColor: 'orange'
+                }}
+                source={require('../../assets/Images/PNG/bell.png')} />
+              {requestsData.length > 0 &&
+                <View style={{
+                  height: 20,
+                  width: 20,
+                  borderRadius: 10,
+                  backgroundColor: 'red',
+                  position: 'absolute',
+                  right: "-5%",
+                  top: "-15%",
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}>
-                Notification
-              </Text>
-              <View style={{
-                height: 20,
-                width: 20,
-                borderRadius: 10,
-                backgroundColor: 'red',
-                position: 'absolute',
-                right: "-5%",
-                top: "-30%",
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Text style={{
-                  color: 'black', fontSize: 12
-                }}>
-                  {requestsData.length}
-                </Text>
-              </View>
+                  <Text style={{
+                    color: 'black', fontSize: 12
+                  }}>
+                    {requestsData.length}
+                  </Text>
+                </View>}
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -396,6 +397,7 @@ const Message = ({ navigation }) => {
               fontFamily: 'ABeeZee-Italic',
               alignSelf: 'center',
               textAlign: 'center',
+              marginBottom: 10,
             }}>
               Profile Request List
             </Text>
@@ -449,36 +451,52 @@ const RenderItem = ({ item, userId, setNotification, setUserInfo }) => (
     paddingVertical: 5,
   }}>
     <Text style={styles.modalMessage}>{item.displayName}</Text>
-    <TouchableOpacity
-      onPress={async () => {
-        const res = await axios.post(API.USER.DENY_PROFILE,
-          {
-            userId: userId,
-            requesterId: item._id
+    <View style={{
+      flexDirection: 'row',
+      gap: 10,
+      marginVertical: 5,
+    }}>
+
+      <TouchableOpacity
+        onPress={async () => {
+          try {
+
+            const res = await axios.post(API.USER.DENY_PROFILE,
+              {
+                userId: userId,
+                requesterId: item._id
+              }
+            )
+            setUserInfo(res.data.user)
+            setNotification(false)
+          } catch (error) {
+
           }
-        )
-        setUserInfo(res.data.user)
-        setNotification(false)
-      }}
-      style={styles.allowButton}
-    >
-      <Text style={styles.modalActionText}>Deny</Text>
-    </TouchableOpacity>
-    <TouchableOpacity
-      onPress={async () => {
-        const res = await axios.post(API.USER.ACCEPT_PROFILE,
-          {
-            accepterID: userId,
-            targetUserId: item._id
+        }}
+        style={styles.allowButton}
+      >
+        <Text style={styles.modalActionText}>Deny</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={async () => {
+          try {
+            const res = await axios.post(API.USER.ACCEPT_PROFILE,
+              {
+                accepterID: userId,
+                targetUserId: item._id
+              }
+            )
+            setUserInfo(res.data.user)
+            setNotification(false)
+          } catch (error) {
           }
-        )
-        setUserInfo(res.data.user)
-        setNotification(false)
-      }}
-      style={styles.allowButton}
-    >
-      <Text style={styles.modalActionText}>Allow</Text>
-    </TouchableOpacity>
+        }}
+        style={styles.allowButton}
+      >
+        <Text style={styles.modalActionText}>Allow</Text>
+      </TouchableOpacity>
+    </View>
+
   </View>
 )
 
@@ -506,20 +524,20 @@ const styles = StyleSheet.create({
   allowButton: {
     backgroundColor: '#3EC8BF',
     padding: 8,
-    width: width * 0.25,
+    width: width * 0.2,
     alignItems: 'center',
     borderRadius: 10,
   },
   modalMessage: {
     color: '#000',
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: 'ABeeZee-Italic',
     alignSelf: 'center',
     textAlign: 'center',
   },
   modalActionText: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 15,
     fontFamily: 'ABeeZee-Italic',
   },
 });
