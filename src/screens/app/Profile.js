@@ -18,7 +18,7 @@ import ImagePicker from 'react-native-image-picker';
 import { SocketContext } from '../../context/SocketContext';
 const Profile = ({ navigation }) => {
   const { userInfo, setUserInfo } = useContext(SocketContext);
-  console.log(userInfo)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,7 +72,7 @@ const Profile = ({ navigation }) => {
         },
       })
       .then(res => {
-        console.log('res?.data',res?.data.user);
+        console.log('res?.data', res?.data.user);
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
           ...res?.data.user
@@ -85,7 +85,19 @@ const Profile = ({ navigation }) => {
         console.log(error);
       });
   };
-
+  const handleLogout = async () => {
+    try {
+      // Remove user data from AsyncStorage
+      await AsyncStorage.removeItem('user');
+      // Reset the navigation stack and navigate to Login screen
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   //   const options = {
   //     mediaType: 'photo',
   //     includeBase64: true,
@@ -461,7 +473,8 @@ const Profile = ({ navigation }) => {
                 borderRadius: 20,
                 width: width * 0.9,
                 alignSelf: 'center',
-                marginVertical: 40,
+                marginTop: 40,
+                marginBottom: 15
               }}>
               <Text
                 style={{
@@ -470,6 +483,25 @@ const Profile = ({ navigation }) => {
                   fontFamily: 'ABeeZee-Italic',
                 }}>
                 Update Profile
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleLogout}
+              style={{
+                backgroundColor: '#33E0CF',
+                padding: 15,
+                alignItems: 'center',
+                borderRadius: 20,
+                width: width * 0.9,
+                alignSelf: 'center',
+              }}>
+              <Text
+                style={{
+                  color: '#FFF',
+                  fontSize: 25,
+                  fontFamily: 'ABeeZee-Italic',
+                }}>
+                Log Out
               </Text>
             </TouchableOpacity>
           </View>

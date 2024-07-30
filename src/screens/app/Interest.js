@@ -12,48 +12,53 @@ import {
   Button,
   Modal,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
   Appl,
   Appl_B,
   Back_Arrow,
-  Down_A,
-  Edit,
-  Face,
-  Female,
-  Goo,
-  Male,
-  Up_A,
 } from '../../assets/Images';
-import {Image} from 'react-native';
-import {Inter} from '../Dummy';
+import { Image } from 'react-native';
+// import { Inter } from '../Dummy';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API } from '../Api';
+import { SocketContext } from '../../context/SocketContext';
 
-const Interset = ({navigation}) => {
+const Interset = ({ navigation, route }) => {
+  const { userInfo } = useContext(SocketContext);
+
   const [selected, setSelected] = useState('Mix');
-  const [interests, setInterests] = useState([]);
+  const [interests, setInterests] = useState(route?.params?.data ? route?.params?.data : []);
   const [newInterest, setNewInterest] = useState('');
   const [addNew, setAddNew] = useState(false);
   const [dToken, setDToken] = useState(false);
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await AsyncStorage.getItem('user');
-        if (data) {
-          const parsedData = JSON.parse(data);
-          const token = parsedData.token;
-        
-          setDToken(token)
-        } else {
-          console.log("No data found");
-        }
-      } catch (error) {
-        console.error("Error retrieving data", error);
+
+  const getinter = async () => {
+    const data = await axios.put(API.USER.GET_INTERESTS, {
+      id: userInfo._id
+    })
+    setSelected(data.data.genderInterest)
+    setInterests(prev => [...prev, ...data.data.interests]);
+  }
+  const fetchData = async () => {
+    try {
+      const data = await AsyncStorage.getItem('user');
+      if (data) {
+        const parsedData = JSON.parse(data);
+        const token = parsedData.token;
+
+        setDToken(token)
+      } else {
+        console.log("No data found");
       }
-    };
+    } catch (error) {
+      console.error("Error retrieving data", error);
+    }
+  };
+
+  useEffect(() => {
+    getinter()
 
     fetchData();
   }, []);
@@ -66,30 +71,32 @@ const Interset = ({navigation}) => {
       setInterests(pre => [...pre, interest]);
     }
   };
-// console.log(selected)
+  // console.log(selected)
   const handleNewInterest = () => {
     setInterests(pre => [...pre, newInterest]);
     setNewInterest('');
     setAddNew(!addNew);
-    Inter.push({
-      title: newInterest,
-    });
   };
-// console.log("first",interests)
-const onAdd = async()=>{
-  const response = await axios.put(API.USER.Add_Inter,{
-    interests,
-    genderInterest:selected
-  },{headers:{
-    Authorization:dToken
-  }}).then(res=>{
-    if (res?.data?.message == "Interest Added Successfully") {
-      navigation.navigate("BottomTabs")
-    }
-  }).catch(error=>{
-    alert(error?.response?.data?.message)
-  })
-}
+  // console.log("first",interests)
+  const flattenArray = (arr) => {
+    return arr.reduce((flat, item) => {
+      return flat.concat(Array.isArray(item) ? flattenArray(item) : item);
+    }, []);
+  };
+  const onAdd = async () => {
+    const flatArray = flattenArray(interests)
+    const response = await axios.put(API.USER.Add_Inter, {
+      interests: flatArray,
+      genderInterest: selected
+    }, {
+      headers: {
+        Authorization: dToken
+      }
+    })
+
+    console.log('response===>', response.data)
+    navigation.navigate("BottomTabs")
+  }
 
   return (
     <SafeAreaView
@@ -122,7 +129,7 @@ const onAdd = async()=>{
               margin: 20,
             }}
             onPress={() => {
-              navigation.pop();
+              navigation.goBack();
             }}>
             <Back_Arrow />
           </TouchableOpacity>
@@ -133,7 +140,7 @@ const onAdd = async()=>{
               justifyContent: 'space-between',
               marginTop: height * 0.02,
             }}>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
             <View
               style={{
                 width: width * 0.58,
@@ -157,7 +164,7 @@ const onAdd = async()=>{
                 Add Your Interests
               </Text>
             </View>
-            <View style={{width: 10}}></View>
+            <View style={{ width: 10 }}></View>
           </View>
           <View
             style={{
@@ -184,12 +191,12 @@ const onAdd = async()=>{
                 alignItems: 'center',
                 justifyContent: 'space-around',
               }}
-              data={Inter}
-              renderItem={({item, index}) => {
+              data={interests}
+              renderItem={({ item, index }) => {
                 return (
                   <TouchableOpacity
                     onPress={() => {
-                      handleAddInterest(item.title);
+                      handleAddInterest(item);
                     }}
                     style={{
                       alignItems: 'center',
@@ -198,9 +205,10 @@ const onAdd = async()=>{
                       paddingHorizontal: 15,
                       borderRadius: 20,
                       margin: 5,
-                      backgroundColor: interests.includes(item.title)
-                        ? '#33E0CF'
-                        : 'transparent',
+                      // backgroundColor: interests.includes(item.title)
+                      //   ? '#33E0CF'
+                      //   : 'transparent',
+                      backgroundColor: '#33E0CF',
                       borderColor: '#33E0CF',
                       justifyContent: 'center',
                     }}>
@@ -209,7 +217,7 @@ const onAdd = async()=>{
                         color: '#000',
                         fontSize: 20,
                       }}>
-                      + {item.title}
+                      + {item}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -352,10 +360,10 @@ const onAdd = async()=>{
           style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <TextInput
-            value={newInterest}
-            onChangeText={e => {
-              setNewInterest(e);
-            }}
+              value={newInterest}
+              onChangeText={e => {
+                setNewInterest(e);
+              }}
               style={{
                 backgroundColor: '#8e8e8e',
                 borderRadius: 10,
@@ -364,9 +372,10 @@ const onAdd = async()=>{
               }}
             />
             <TouchableOpacity
-            onPress={()=>{handleNewInterest(),
-              setAddNew(!addNew)
-            }}
+              onPress={() => {
+                handleNewInterest(),
+                  setAddNew(!addNew)
+              }}
               style={{
                 backgroundColor: '#FFF',
                 borderWidth: 2,
@@ -375,10 +384,10 @@ const onAdd = async()=>{
                 borderRadius: 10,
                 alignSelf: 'center',
                 marginVertical: 20,
-                width: width * 0.2,alignItems:"center"
+                width: width * 0.2, alignItems: "center"
               }}>
               <Text style={{
-                color:"#000",fontSize:18
+                color: "#000", fontSize: 18
               }}>Add</Text>
             </TouchableOpacity>
           </View>
@@ -387,7 +396,7 @@ const onAdd = async()=>{
     </SafeAreaView>
   );
 };
-const {height, width} = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   modalBackground: {
     // flex: 1,
@@ -459,3 +468,6 @@ const styles = StyleSheet.create({
   },
 });
 export default Interset;
+
+
+

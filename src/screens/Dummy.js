@@ -1,43 +1,19 @@
 import {Mess, Sugest} from '../assets/Images';
 
 export const Inter = [
-  {
-    title: 'Books',
-  },
-  {
-    title: 'Sports',
-  },
-  {
-    title: 'Music',
-  },
-  {
-    title: 'Games',
-  },
-  {
-    title: 'Cooking',
-  },
-  {
-    title: 'Cricket',
-  },
-  {
-    title: 'Traveling',
-  },
-  {
-    title: 'Driving',
-  },
-  {
-    title: 'Diving',
-  },
-  {
-    title: 'Programming',
-  },
-  {
-    title: 'Jailer',
-  },
-  // {
-  //   title: '',
-  // },
+  'Books',
+  'Sports',
+  'Music',
+  'Games',
+  'Cooking',
+  'Cricket',
+  'Traveling',
+  'Driving',
+  'Diving',
+  'Programming',
+  'Jailer',
 ];
+
 export const BottomTabsIcons = Color => [
   <Mess Color={Color} />,
   <Sugest Color={Color} />,

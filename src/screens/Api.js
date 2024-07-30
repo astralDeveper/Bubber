@@ -1,7 +1,7 @@
 
 // export const BASE_URL = 'http://192.168.100.37:3000';
-// export const BASE_URL = 'http://192.168.100.21:3000'; // muz
-export const BASE_URL = 'https://chatting-app-backend-rw5k.onrender.com';
+export const BASE_URL = 'http://192.168.100.21:3000'; // muz
+// export const BASE_URL = 'https://chatting-app-backend-rw5k.onrender.com';
 
 
 export const API = {
@@ -25,6 +25,7 @@ export const API = {
     CONVERSATIONS_END: `${BASE_URL}/auth/conversations/end`,
     GET_CONVERSATIONS_ID: `${BASE_URL}/auth/get-conversation`,
     START_CONVERSATION: `${BASE_URL}/auth/conversations/start`,
+    GET_INTERESTS: `${BASE_URL}/auth/get-interests`,
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };

@@ -97,7 +97,7 @@ const Login = ({ navigation }) => {
               margin: 20,
             }}
             onPress={() => {
-              navigation.pop();
+              navigation.navigate('Welcome');
             }}>
             <Back_Arrow />
           </TouchableOpacity>

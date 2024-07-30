@@ -28,6 +28,7 @@ import axios from 'axios';
 import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketContext } from '../../context/SocketContext';
+import { Inter } from '../Dummy';
 const Bio = ({ navigation }) => {
   const { setUserInfo } = useContext(SocketContext);
   const [selectedGender, setSelectedGender] = useState('');
@@ -137,7 +138,7 @@ const Bio = ({ navigation }) => {
           .then(res => {
             setUserInfo(res.data.user);
             alert("Profile Created Successfully")
-            navigation.navigate("Interset");
+            navigation.navigate("Interset", { data: Inter });
           })
       }
     } catch (error) {
