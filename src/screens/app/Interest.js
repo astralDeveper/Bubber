@@ -103,13 +103,18 @@ const Interset = ({ navigation, route }) => {
       <ScrollView>
         <View
           style={styles.flex1}>
-          <TouchableOpacity
+          {!route?.params?.data ? <TouchableOpacity
             style={{
               margin: 20,
             }}
-            onPress={() => navigation.goBack()}>
+            onPress={() => navigation.navigate("Message")}
+          >
             <Back_Arrow />
-          </TouchableOpacity>
+          </TouchableOpacity> :
+            <View style={{
+              margin: 20
+            }} />
+          }
           <View
             style={styles.header}>
             <View style={styles.interestLine}></View>
@@ -143,8 +148,7 @@ const Interset = ({ navigation, route }) => {
                 fontSize: 15,
                 textAlign: 'center',
               }}>
-              Add your interests below to connect with like-minded individuals
-              and meet people based on shared interests.
+              Add your interests below to connect with like-minded individuals and meet people based on shared interests. If you wish to remove any interests, please click on the tag.
             </Text>
           </View>
           <View>
@@ -357,7 +361,7 @@ const Interset = ({ navigation, route }) => {
           </View>
         </TouchableOpacity>
       </Modal>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 const { height, width } = Dimensions.get('window');
