@@ -210,7 +210,7 @@ const Message = ({ navigation }) => {
                 source={
                   userInfo.image?.path
                     ? { uri: userInfo.image.path }
-                    : require('../../assets/Images/Icons/Pro.png')
+                    : require('../../assets/Images/Icons/Sugp.png')
                 }
                 style={{
                   height: 50,
