@@ -25,31 +25,10 @@ const SocketContextProvider = ({ children }) => {
       SocketInstance = Socket;
 
       Socket.emit('connected', { id: user?.user?._id });
-      console.log('Socket connected and initialized');
-
-      // Socket.on('disconnect', () => {
-      //   console.log('Socket disconnected');
-      // });
     } catch (error) {
       console.log('Socket initialization error:', error);
     }
   };
-
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       let rawUser = await AsyncStorage.getItem('user');
-  //       if (rawUser) {
-  //         let user = await JSON.parse(rawUser);
-  //         setUserInstance(user);
-  //       }
-  //     } catch (error) {
-  //       console.log('Error fetching user:', error);
-  //     }
-  //   };
-
-  //   fetchUser();
-  // }, []);
 
   useEffect(() => {
     if (userInstance) {
@@ -61,7 +40,6 @@ const SocketContextProvider = ({ children }) => {
     };
   }, [userInstance]);
 
-  console.log(userInstance)
 
   return (
     <SocketContext.Provider

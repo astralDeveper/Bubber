@@ -58,7 +58,7 @@ const Message = ({ navigation }) => {
 
       }
     } catch (error) {
-      console.log('error', error);
+      console.log('ERROR===>', error);
     }
   };
   const conversationPerson = async () => {
@@ -72,10 +72,9 @@ const Message = ({ navigation }) => {
             Authorization: userInstance?.token
           }
         });
-      console.log('res===>> converstaoin', res.data)
     } catch (error) {
 
-      console.log('error===>> converstaoin', error)
+      console.log('ERROR===>> converstaoin', error)
     }
   }
 
@@ -140,7 +139,6 @@ const Message = ({ navigation }) => {
     return (timeString);
   };
 
-  console.log('res.data.user', userInfo)
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#3EC8BF' }}>
       <ScrollView>
@@ -232,7 +230,6 @@ const Message = ({ navigation }) => {
             }}>
             {conData?.map((item, userIndex) =>
               item.participants.map((user, index) => (
-                console.log("Hellosdf=====>", user),
                 <Fragment key={index}>
                   {user?._id !== userInstance?.user?._id ? (
                     <View style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>

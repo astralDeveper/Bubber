@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Alert,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Back, Clip, Send } from '../../assets/Images';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -35,12 +36,15 @@ const Chat_Sen = ({ navigation, route }) => {
   const [conversation, setConversation] = useState(null);
   const scrollViewRef = useRef(null);
   const [precipitant, setPrecipitant] = useState();
+  const [loading, setLoading] = useState(false);
+
   const [isFirst, setisFirst] = useState(route.params.first);
 
   const otherDetail = async () => {
     try {
       const included = userInfo.isprofileshown.includes(userdata._id);
       if (included) {
+        setLoading(true)
         const res = await axios.post(API.USER.OTHER_PROFILE, {
           id: userdata._id
         })
@@ -56,18 +60,23 @@ const Chat_Sen = ({ navigation, route }) => {
         else setRequest(true)
         setPrecipitant(res.data.user)
       }
+      setLoading(false)
     } catch (error) {
-      console.log(error)
+      setLoading(false)
+      console.log("ERROR====>", error)
     }
   }
   const chatHandler = async () => {
     try {
+      setLoading(true)
       const res = await axios.post(API.USER.OTHER_PROFILE, {
         id: userdata._id
       })
       setPrecipitant(res.data.user)
+      setLoading(false)
     } catch (error) {
-      console.log(error)
+      setLoading(false)
+      console.log("ERROR====>", error)
     }
   }
 
@@ -89,49 +98,35 @@ const Chat_Sen = ({ navigation, route }) => {
         userId: userInfo._id,
         targetUserId: userdata._id
       }
-      console.log(IDS, "s----------------------------------");
-
-      // Check if userdata is defined and has _id
       if (!userdata || !userdata._id) {
         throw new Error('User data is missing or does not contain _id');
       }
-
-      const res = await axios.post(API.USER.REQUEST_PROFILE, IDS);
-
-      console.log('res--->', res);
-
+      await axios.post(API.USER.REQUEST_PROFILE, IDS);
     } catch (error) {
+      setLoading(false)
       console.error('Error occurred:', error);
     }
   };
   const grantProfileViewRequest = async () => {
     try {
+      setLoading(true)
       const IDS = {
         userId: userInfo._id,
         requesterId: userdata._id
       }
-      console.log(IDS, "s----------------------------------");
-
-      // Check if userdata is defined and has _id
       if (!userdata || !userdata._id) {
         throw new Error('User data is missing or does not contain _id');
       }
-
-      const res = await axios.post(API.USER.GRANT_PROFILE, IDS);
-
-      console.log('res--->', res);
-
+      await axios.post(API.USER.GRANT_PROFILE, IDS);
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.error('Error occurred:', error);
     }
   };
 
   useEffect(() => {
-    // Listen for profile view requests
     socketInstance.on('profile-view-request', (data) => {
-      console.log('Profile view request received:', data);
-
-      // Show alert
       Alert.alert(
         "Profile View Request",
         `User ${data.fromUserId} has viewed your profile.`,
@@ -146,50 +141,28 @@ const Chat_Sen = ({ navigation, route }) => {
       socketInstance.off('profile-view-request');
     };
   }, []);
-  const handleIncomingProfileViewRequests = () => {
-    socketInstance.on('profile-view-request', (data) => {
-      console.log('Profile view request received:', data);
-      displayProfileViewRequest(data); // Function to display the request
-    });
 
-    socketInstance.on('error', (error) => {
-      console.error('Error:', error.message);
-    });
-
-    socketInstance.on('info', (info) => {
-      console.info('Info:', info.message);
-    });
+  const getConversation = async () => {
+    try {
+      setLoading(true)
+      const rawUser = await AsyncStorage.getItem('user');
+      const user = JSON.parse(rawUser);
+      if (user && user.token) {
+        const res = await axios.get(`${BASE_URL}/auth/get-conversation/${userdata._id}`, {
+          headers: { Authorization: user.token },
+        });
+        setConversation(res?.data?.conversation || {});
+      } else {
+        console.error('User token is missing');
+      }
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.error('Error fetching conversation:', error);
+    }
   };
-  const displayProfileViewRequest = (data) => {
-    const { message, from } = data;
-    // Implement your logic to show the profile view request, e.g., update UI, show a notification
-    console.log(`Notification: ${message} from user ID ${from}`);
-    // Example: Display a notification or update a UI element
-    const notificationArea = document.getElementById('notifications');
-    const notification = document.createElement('div');
-    notification.textContent = `You have a new profile view request from user ID ${from}`;
-    notificationArea.appendChild(notification);
-  };
-  // Fetch conversation when component mounts or userdata changes
 
   useEffect(() => {
-    const getConversation = async () => {
-      try {
-        const rawUser = await AsyncStorage.getItem('user');
-        const user = JSON.parse(rawUser);
-        if (user && user.token) {
-          const res = await axios.get(`${BASE_URL}/auth/get-conversation/${userdata._id}`, {
-            headers: { Authorization: user.token },
-          });
-          setConversation(res?.data?.conversation || {});
-        } else {
-          console.error('User token is missing');
-        }
-      } catch (error) {
-        console.error('Error fetching conversation:', error);
-      }
-    };
-
     getConversation();
   }, [userdata]);
 
@@ -245,7 +218,7 @@ const Chat_Sen = ({ navigation, route }) => {
       scrollViewRef.current.scrollToEnd({ animated: false });
     }
   }, [conversation]);
-  console.log('userInfo?.activeConversation == precipitant?.activeConversation', userInfo?.activeConversation, precipitant?.activeConversation)
+
   const sendMessage = () => {
     if (userInfo.activeConversation != 'false' && userInfo?.activeConversation == precipitant?.activeConversation) {
       if (message.length > 0 && socketInstance && userInstance?.user?._id) {
@@ -260,10 +233,9 @@ const Chat_Sen = ({ navigation, route }) => {
       }
     } else setModalVisible(true)
   };
+
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
-
-    // Format the time to "1:00 PM"
     const options = {
       hour: '2-digit',
       minute: '2-digit',
@@ -273,6 +245,7 @@ const Chat_Sen = ({ navigation, route }) => {
     const timeString = date.toLocaleTimeString('en-US', options);
     return (timeString);
   };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -285,74 +258,92 @@ const Chat_Sen = ({ navigation, route }) => {
             <TouchableOpacity onPress={() => navigation.navigate('Message')} style={styles.backButton}>
               <Back />
             </TouchableOpacity>
-            <Image
-              source={req ? require('../../assets/Images/Icons/Sugp.png') : thatImage
-                ? { uri: thatImage } : require('../../assets/Images/Icons/Pro.png')}
-              style={{
-                height: 50,
-                width: 50,
-                borderRadius: 100,
-              }}
-            />
+            {loading ?
+              <ActivityIndicator size={'small'} color={'#eff'} />
+              :
+              <Image
+                source={req ? require('../../assets/Images/Icons/Sugp.png') : thatImage
+                  ? { uri: thatImage } : require('../../assets/Images/Icons/Pro.png')}
+                style={{
+                  height: 50,
+                  width: 50,
+                  borderRadius: 100,
+                }}
+              />
+            }
             <Text style={styles.displayNameText}>{request ? name : userdata?.displayName}</Text>
           </View>
-          {request && (
-            <TouchableOpacity onPress={() => {
-              // setModalVisible(true)
-              sendProfileViewRequest()
+          {loading ?
+            <ActivityIndicator size={'small'} color={'#eff'} />
+            : request && (
+              <TouchableOpacity onPress={() => {
+                // setModalVisible(true)
+                sendProfileViewRequest()
 
-            }} style={styles.profileRequestButton}>
-              <Text style={styles.profileRequestText}>Profile Request</Text>
-            </TouchableOpacity>
-          )}
+              }} style={styles.profileRequestButton}>
+                <Text style={styles.profileRequestText}>Profile Request</Text>
+              </TouchableOpacity>
+            )}
 
         </View>
 
         <ScrollView ref={scrollViewRef}>
-          <>
-            {conversation?.messages?.map((item, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.messageBubble,
-                  {
-                    backgroundColor: item?.sender === userInstance?.user?._id ? '#20A090' : '#F2F7FB',
-                    alignSelf: item?.sender === userInstance?.user?._id ? 'flex-end' : 'flex-start',
-                    borderTopRightRadius: item?.sender === userInstance?.user?._id ? 0 : 10,
-                    borderTopLeftRadius: item?.sender === userInstance?.user?._id ? 10 : 0,
-                  },
-                ]}
-              >
-                <Text style={[
-                  styles.messageText,
-                  { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
-                ]}>
-                  {item?.content}
-                </Text>
-                <Text style={styles.timestamp}>{formatTime(item.date)}</Text>
-              </View>
-            ))}
-          </>
+          {loading ?
+            <View style={{ height: height * .8, justifyContent: 'center', alignItems: 'center' }}>
+              <ActivityIndicator size={Platform.OS == 'ios' ? 'large' : width * .2} color={'#3EC8BF'} />
+            </View>
+            : <>
+              {conversation?.messages?.map((item, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.messageBubble,
+                    {
+                      backgroundColor: item?.sender === userInstance?.user?._id ? '#20A090' : '#F2F7FB',
+                      alignSelf: item?.sender === userInstance?.user?._id ? 'flex-end' : 'flex-start',
+                      borderTopRightRadius: item?.sender === userInstance?.user?._id ? 0 : 10,
+                      borderTopLeftRadius: item?.sender === userInstance?.user?._id ? 10 : 0,
+                    },
+                  ]}
+                >
+                  <Text style={[
+                    styles.messageText,
+                    { color: item?.sender === userInstance?.user?._id ? '#FFF' : '#000' },
+                  ]}>
+                    {item?.content}
+                  </Text>
+                  <Text style={styles.timestamp}>{formatTime(item.date)}</Text>
+                </View>
+              ))}
+            </>}
         </ScrollView>
-        {userInfo?.activeConversation == 'false' ?
-          <Message onPress={sendMessage} /> :
-          userInfo?.activeConversation != precipitant?.activeConversation ?
-            <Message onPress={sendMessage} /> : <View style={styles.inputContainer}>
-              <TextInput
-                multiline
-                placeholder="Write your message"
-                placeholderTextColor={'#797C7B'}
-                value={message}
-                onChangeText={setMessage}
-                style={styles.textInput}
-              />
-              <TouchableOpacity onPress={grantProfileViewRequest}>
-                <Clip />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={sendMessage}>
-                <Send />
-              </TouchableOpacity>
-            </View>}
+        {
+          loading ?
+            <View style={{
+              marginVertical: 10,
+              marginBottom: 15,
+            }}>
+              <ActivityIndicator size={'small'} color={'#3EC8BF'} />
+            </View> :
+            userInfo?.activeConversation == 'false' ?
+              <Message onPress={sendMessage} /> :
+              userInfo?.activeConversation != precipitant?.activeConversation ?
+                <Message onPress={sendMessage} /> : <View style={styles.inputContainer}>
+                  <TextInput
+                    multiline
+                    placeholder="Write your message"
+                    placeholderTextColor={'#797C7B'}
+                    value={message}
+                    onChangeText={setMessage}
+                    style={styles.textInput}
+                  />
+                  <TouchableOpacity onPress={grantProfileViewRequest}>
+                    <Clip />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={sendMessage}>
+                    <Send />
+                  </TouchableOpacity>
+                </View>}
         <Modal transparent={true} visible={modalVisible} animationType="slide">
           <TouchableOpacity
             activeOpacity={1}

@@ -43,12 +43,11 @@ const Login = ({ navigation }) => {
       const { idToken } = await userInfo;
 
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      console.log('22222', userInfo);
       await auth().signInWithCredential(googleCredential);
 
       navigation.navigate('Bio');
     } catch (error) {
-      console.log('first', error);
+      console.log('ERROR===>', error)
     }
   });
 
@@ -59,22 +58,18 @@ const Login = ({ navigation }) => {
         password: pass,
       })
       .then(async (response) => {
-        console.log(response?.data);
         if (response?.data) {
           alert("Login Successfull")
           setUserInstance(response?.data);
           setUserInfo(response?.data?.user)
           await AsyncStorage.setItem('user', JSON.stringify(response?.data));
-          console.log(navigation)
           navigation.navigate('BottomTabs');
         }
       })
       .catch(response => {
-        console.log(response)
         if (response?.message == 'Request failed with status code 404') {
           alert('User not found with this email! .');
         }
-        // console.log("first",response?.message)
         if (response?.message == 'Request failed with status code 405') {
           alert('Incorrect email or password! .');
         }

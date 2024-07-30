@@ -85,7 +85,6 @@ const ChatComponent = () => {
       const ownId = {
         userid: userInstance?.user?._id,
       };
-      console.log(ownId, "s----------------------------------");
   
       // Check if userdata is defined and has _id
       if (!userdata || !userdata._id) {

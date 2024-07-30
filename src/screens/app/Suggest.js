@@ -22,6 +22,8 @@ import {
   Image,
   Modal,
   StyleSheet,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -34,6 +36,7 @@ const Suggestion = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [dToken, setDToken] = useState();
   const [uData, setUData] = useState();
+  const [loading, setLoading] = useState(false);
   const [selectedChatID, setSelectedChatID] = useState(null);
   const [pendingChatID, setpendingChatID] = useState(null);
   const [chatUserData, setChatUserData] = useState();
@@ -65,14 +68,16 @@ const Suggestion = ({ navigation }) => {
 
   const getSuggestions = async token => {
     try {
+      setLoading(true)
       const res = await axios.get(API.USER.SUGGES, {
         headers: {
           Authorization: token,
         },
       });
       setUData(res?.data?.suggestions);
-      console.log('res?.data?.suggestions', res?.data?.suggestions)
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
       console.log('error', error);
     }
   };
@@ -121,39 +126,44 @@ const Suggestion = ({ navigation }) => {
             </Text>
           </View>
           <View style={styles.listContainer}>
-            <FlatList
-              data={uData}
-              renderItem={({ item, index }) => {
-                const isDisabled =
-                  selectedChatID != item.user._id ? true : false;
-                return (isDisabled &&
-                  <View>
-                    {item?.user?.type === "super-admin" ? null : <View style={styles.listItem}>
-                      <View style={styles.userInfo}>
-                        <Image
-                          source={require('../../assets/Images/Icons/Sugp.png')}
-                          style={styles.userImage}
-                        />
-                        <Text
-                          style={styles.userName}
-                          numberOfLines={1}
-                          ellipsizeMode="tail">
-                          {item?.user?.displayName}
-                        </Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => {
-                          handleItemPress(index, item);
-                        }}
-                        // disabled={isDisabled}
-                        style={styles.chatButton}>
-                        <Text style={styles.chatButtonText}>Chat</Text>
-                      </TouchableOpacity>
-                    </View>}
-                  </View>
-                );
-              }}
-            />
+            {loading ?
+              <View style={{ height: height * .5, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size={Platform.OS == 'ios' ? 'large' : width * .2} color={'#3EC8BF'} />
+              </View>
+              :
+              <FlatList
+                data={uData}
+                renderItem={({ item, index }) => {
+                  const isDisabled =
+                    selectedChatID != item.user._id ? true : false;
+                  return (isDisabled &&
+                    <View>
+                      {item?.user?.type === "super-admin" ? null : <View style={styles.listItem}>
+                        <View style={styles.userInfo}>
+                          <Image
+                            source={require('../../assets/Images/Icons/Sugp.png')}
+                            style={styles.userImage}
+                          />
+                          <Text
+                            style={styles.userName}
+                            numberOfLines={1}
+                            ellipsizeMode="tail">
+                            {item?.user?.displayName}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => {
+                            handleItemPress(index, item);
+                          }}
+                          // disabled={isDisabled}
+                          style={styles.chatButton}>
+                          <Text style={styles.chatButtonText}>Chat</Text>
+                        </TouchableOpacity>
+                      </View>}
+                    </View>
+                  );
+                }}
+              />}
           </View>
         </View>
       </ScrollView>

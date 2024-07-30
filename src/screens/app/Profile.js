@@ -8,13 +8,12 @@ import {
   ScrollView,
 } from 'react-native';
 import React, { useContext, useEffect, useState } from 'react';
-import { Back_Arrow, Back_W, Messeg, Pen } from '../../assets/Images';
+import { Back_W, Messeg, Pen } from '../../assets/Images';
 import { Image } from 'react-native';
 import axios from 'axios';
 import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
-import ImagePicker from 'react-native-image-picker';
 import { SocketContext } from '../../context/SocketContext';
 const Profile = ({ navigation }) => {
   const { userInfo, setUserInfo } = useContext(SocketContext);
@@ -72,7 +71,6 @@ const Profile = ({ navigation }) => {
         },
       })
       .then(res => {
-        console.log('res?.data', res?.data.user);
         setUserInfo(prevUserInfo => ({
           ...prevUserInfo,
           ...res?.data.user
@@ -82,7 +80,7 @@ const Profile = ({ navigation }) => {
         navigation.goBack()
       })
       .catch(error => {
-        console.log(error);
+        console.log("ERROR===>", error);
       });
   };
   const handleLogout = async () => {
@@ -98,45 +96,6 @@ const Profile = ({ navigation }) => {
       console.error('Logout failed:', error);
     }
   };
-  //   const options = {
-  //     mediaType: 'photo',
-  //     includeBase64: true,
-  //     maxHeight: 2000,
-  //     maxWidth: 2000,
-  //   };
-
-  //   launchImageLibrary(options, async response => {
-  //     if (response.didCancel) {
-  //       Toast.show({
-  //         type: 'error',
-  //         text1: 'Canceled The upload',
-  //       });
-  //     } else if (response.error) {
-  //       // alert('Error');
-  //       // console.log('Image picker error: ', response.error);
-  //     } else {
-  //       if (response.assets && response.assets.length > 0) {
-  //         console.log(response.assets[0])
-  //         const pickedMedia = response.assets[0];
-
-  //         const mediaType = pickedMedia.type; // This will give you the MIME type of the picked media
-
-  //         if (mediaType.startsWith('image/')) {
-  //           // It's an image
-  //           let imageUri = pickedMedia.uri;
-  //           setpvide(imageUri);
-  //           console.log('first', imageUri);
-  //         } else {
-  //           // Unsupported media type
-  //           alert('Unsupported media type');
-  //         }
-  //       } else {
-  //         // No assets returned
-  //         alert('No media picked');
-  //       }
-  //     }
-  //   });
-  // };
   const openImagePicker = () => {
     const options = {
       title: 'Select File',

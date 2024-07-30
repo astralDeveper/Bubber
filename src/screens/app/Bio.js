@@ -66,7 +66,6 @@ const Bio = ({ navigation }) => {
     fetchData();
   }, []);
 
-  // console.log("data", dtoken);
 
   const openImagePicker = () => {
     const options = {
@@ -83,8 +82,7 @@ const Bio = ({ navigation }) => {
           text1: 'Canceled The upload',
         });
       } else if (response.error) {
-        // alert('Error');
-        // console.log('Image picker error: ', response.error);
+
       } else {
         if (response.assets && response.assets.length > 0) {
           const pickedMedia = response.assets[0];
@@ -99,7 +97,6 @@ const Bio = ({ navigation }) => {
               name: response.assets[0]?.fileName
             }
             setpivid(source);
-            // console.log('first', response.assets[0]?.uri);
           } else {
             // Unsupported media type
             alert('Unsupported media type');
@@ -127,7 +124,6 @@ const Bio = ({ navigation }) => {
           'Content-Type': 'multipart/form-data' // Important for FormData
         }
       });
-      console.log("Res", response?.data);
       if (response?.data?.message === "Profile Created Successfully") {
         await axios
           .get(API.USER.PROFILE_DATA, {
@@ -142,7 +138,7 @@ const Bio = ({ navigation }) => {
           })
       }
     } catch (error) {
-      console.log(error);
+      console.log("ERROR==>", error);
     }
   }
 

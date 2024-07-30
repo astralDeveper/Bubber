@@ -1,3 +1,9 @@
+import React, {
+  useContext,
+  useEffect,
+  useState
+} from 'react';
+
 import {
   View,
   Text,
@@ -7,32 +13,25 @@ import {
   TextInput,
   ScrollView,
   StyleSheet,
-  Keyboard,
   FlatList,
-  Button,
   Modal,
 } from 'react-native';
-import React, { useContext, useEffect, useState } from 'react';
-import {
-  Appl,
-  Appl_B,
-  Back_Arrow,
-} from '../../assets/Images';
-import { Image } from 'react-native';
-// import { Inter } from '../Dummy';
+
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { API } from '../Api';
+import { Back_Arrow } from '../../assets/Images';
 import { SocketContext } from '../../context/SocketContext';
 
 const Interset = ({ navigation, route }) => {
-  const { userInfo } = useContext(SocketContext);
-
-  const [selected, setSelected] = useState('Mix');
-  const [interests, setInterests] = useState(route?.params?.data ? route?.params?.data : []);
-  const [newInterest, setNewInterest] = useState('');
   const [addNew, setAddNew] = useState(false);
   const [dToken, setDToken] = useState(false);
+  const [selected, setSelected] = useState('Mix');
+  const [newInterest, setNewInterest] = useState('');
+  const [interests, setInterests] = useState(route?.params?.data ? route?.params?.data : []);
+
+  const { userInfo } = useContext(SocketContext);
 
   const getinter = async () => {
     const data = await axios.put(API.USER.GET_INTERESTS, {
@@ -40,7 +39,8 @@ const Interset = ({ navigation, route }) => {
     })
     setSelected(data.data.genderInterest)
     setInterests(prev => [...prev, ...data.data.interests]);
-  }
+  };
+
   const fetchData = async () => {
     try {
       const data = await AsyncStorage.getItem('user');
@@ -59,9 +59,9 @@ const Interset = ({ navigation, route }) => {
 
   useEffect(() => {
     getinter()
-
     fetchData();
   }, []);
+
   const handleAddInterest = interest => {
     let a = interests.find(item => item === interest);
     if (a) {
@@ -71,88 +71,52 @@ const Interset = ({ navigation, route }) => {
       setInterests(pre => [...pre, interest]);
     }
   };
-  // console.log(selected)
+
   const handleNewInterest = () => {
     setInterests(pre => [...pre, newInterest]);
     setNewInterest('');
     setAddNew(!addNew);
   };
-  // console.log("first",interests)
+
   const flattenArray = (arr) => {
     return arr.reduce((flat, item) => {
       return flat.concat(Array.isArray(item) ? flattenArray(item) : item);
     }, []);
   };
+
   const onAdd = async () => {
     const flatArray = flattenArray(interests)
-    const response = await axios.put(API.USER.Add_Inter, {
+    await axios.put(API.USER.Add_Inter, {
       interests: flatArray,
       genderInterest: selected
     }, {
       headers: {
         Authorization: dToken
       }
-    })
-
-    console.log('response===>', response.data)
-    navigation.navigate("BottomTabs")
+    });
+    navigation.navigate("BottomTabs");
   }
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: '#FFF',
-      }}>
+      style={styles.mainContainer}>
       <ScrollView>
-        {/* {addNew ? (
-          <View>
-            <TextInput
-              value={newInterest}
-              onChangeText={e => {
-                setNewInterest(e);
-              }}
-              style={{borderWidth: 1, borderColor: 'black'}}
-            />
-            <Button title="Add" onPress={handleNewInterest}>
-              Add
-            </Button>
-          </View>
-        ) : ( */}
         <View
-          style={{
-            flex: 1,
-            // height: height,
-          }}>
+          style={styles.flex1}>
           <TouchableOpacity
             style={{
               margin: 20,
             }}
-            onPress={() => {
-              navigation.goBack();
-            }}>
+            onPress={() => navigation.goBack()}>
             <Back_Arrow />
           </TouchableOpacity>
           <View
-            style={{
-              alignItems: 'center',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginTop: height * 0.02,
-            }}>
-            <View style={{ width: 10 }}></View>
+            style={styles.header}>
+            <View style={styles.interestLine}></View>
             <View
-              style={{
-                width: width * 0.58,
-              }}>
+              style={styles.headerTextView}>
               <View
-                style={{
-                  backgroundColor: '#33E0CF',
-                  height: height * 0.02,
-                  width: width * 0.2,
-                  alignSelf: 'flex-end',
-                  marginRight: 20,
-                }}></View>
+                style={styles.headerParacontainer}></View>
               <Text
                 style={{
                   color: '#000',
@@ -397,10 +361,30 @@ const Interset = ({ navigation, route }) => {
   );
 };
 const { height, width } = Dimensions.get('window');
+
+
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#FFF',
+  },
+  flex1: { flex: 1 },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: height * 0.02,
+  },
+  interestLine: { width: 10 },
+  headerTextView: { width: width * 0.58, },
+  headerParacontainer: {
+    backgroundColor: '#33E0CF',
+    height: height * 0.02,
+    width: width * 0.2,
+    alignSelf: 'flex-end',
+    marginRight: 20,
+  },
   modalBackground: {
-    // flex: 1,
-    // justifyContent: 'center',
     position: 'absolute',
     marginTop: height * 0.1,
     alignSelf: 'center',

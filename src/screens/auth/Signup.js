@@ -40,7 +40,6 @@ const Signup = ({ navigation }) => {
       Alert.alert('Sign Up successful.');
       navigation?.navigate('Bio');
     } catch (error) {
-      console.log(error);
       if (error.response) {
         // Server responded with a status other than 200 range
         const status = error.response.status;
