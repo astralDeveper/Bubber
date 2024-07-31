@@ -15,10 +15,8 @@ const Forgep = ({ navigation }) => {
   const [email, setEmail] = useState();
   const submit = () => {
     const validate = emailValidation(email);
-    if (validate) navigation.navigate('Bio');
+    if (validate) navigation.navigate('OTPScreen');
   }
-
-
   return (
     <SafeAreaView
       style={{

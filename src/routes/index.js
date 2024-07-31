@@ -14,6 +14,7 @@ import Premium from '../screens/app/Premium';
 import Forgep from '../screens/app/Forgep';
 import SocketContextProvider from '../context/SocketContext';
 import ResetPassword from '../screens/auth/ResetPassword';
+import OTPScreen from '../screens/auth/OTP';
 
 const Stack = createNativeStackNavigator();
 
@@ -80,6 +81,11 @@ const Route = () => {
           <Stack.Screen
             name="ResetPassword"
             component={ResetPassword}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="OTPScreen"
+            component={OTPScreen}
             options={{headerShown: false}}
           />
         </Stack.Navigator>

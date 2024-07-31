@@ -3827,6 +3827,7 @@ __metadata:
     react-native: 0.74.3
     react-native-image-picker: ^7.1.2
     react-native-linear-gradient: ^2.8.3
+    react-native-otp-textinput: ^1.1.6
     react-native-safe-area-context: ^4.10.8
     react-native-screens: 3.29.0
     react-native-svg: ^15.4.0
@@ -9205,6 +9206,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: f980d324e551bbc475c6406bdc5250a08242020cbe653412fa169bbdf51e28a502e225de105b4d696d6a1a1b733d44782469020f4936d8b3ce0e2c78e51cf58f
+  languageName: node
+  linkType: hard
+
+"react-native-otp-textinput@npm:^1.1.6":
+  version: 1.1.6
+  resolution: "react-native-otp-textinput@npm:1.1.6"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 8527954918677d196485562ca59e4e031f5bb3da6b91f397b8f045ce40f55e81d7840c35b63de79d930e3e0a48beef045ae1c00ac565d8fba34371516e4d374b
   languageName: node
   linkType: hard
 
