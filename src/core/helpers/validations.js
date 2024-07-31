@@ -1,5 +1,14 @@
 import { Toast } from "react-native-toast-notifications";
-import { ToastMessage } from "../../../App";
+
+export const emailValidation = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        Toast.show('Invalid email address');
+        return false;
+    }
+    return true;
+}
+
 
 export const validateForm = (name, email, password, confirmPassword) => {
 
