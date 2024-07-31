@@ -34,3 +34,40 @@ export const validateForm = (name, email, password, confirmPassword) => {
 
     return true;
 };
+
+export const bioValidation = (values) => {
+
+    if (!values.displayName.trim()) {
+        Toast.show('Display Name is required');
+        return false
+    } else if (values.displayName.length < 3) {
+        Toast.show('Display Name must be at least 3 characters long');
+        return false
+    }
+
+    if (!values.realName.trim()) {
+        Toast.show('Real Name is required');
+        return false
+    } else if (values.realName.length < 3) {
+        Toast.show('Real Name must be at least 3 characters long');
+        return false
+    }
+
+    if (!values.age) {
+        Toast.show('Age is required');
+        return false
+    } else if (!Number.isInteger(Number(values.age)) || Number(values.age) <= 0 || Number(values.age) > 120) {
+        Toast.show('Age must be a positive integer between 1 and 120');
+        return false
+    }
+
+    if (!values.gender) {
+        Toast.show('Gender is required');
+        return false
+    } else if (!['Male', 'Female'].includes(values.gender)) {
+        Toast.show('Invalid Gender');
+        return false
+    }
+
+    return true;
+};

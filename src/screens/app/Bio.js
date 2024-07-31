@@ -29,6 +29,7 @@ import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketContext } from '../../context/SocketContext';
 import { Inter } from '../Dummy';
+import { bioValidation } from '../../core/helpers/validations';
 const Bio = ({ navigation }) => {
   const { setUserInfo } = useContext(SocketContext);
   const [selectedGender, setSelectedGender] = useState('');
@@ -109,36 +110,40 @@ const Bio = ({ navigation }) => {
     });
   };
   const onCreate = async () => {
-    const formData = new FormData();
-    formData.append('image', pivid); // Assuming pivid is a file or Blob
-    formData.append('displayName', dName);
-    formData.append('realName', rName);
-    formData.append('gender', selectedGender);
-    formData.append('language', 'english');
-    formData.append('age', age);
+    const validate = bioValidation({ displayName: dName, realName: rName, age: age, gender: selectedGender });
+    console.log('validate', validate)
+    if (validate) {
+      const formData = new FormData();
+      formData.append('image', pivid); // Assuming pivid is a file or Blob
+      formData.append('displayName', dName);
+      formData.append('realName', rName);
+      formData.append('gender', selectedGender);
+      formData.append('language', 'english');
+      formData.append('age', age);
 
-    try {
-      const response = await axios.post(API.USER.C_PROFILE, formData, {
-        headers: {
-          Authorization: dtoken,
-          'Content-Type': 'multipart/form-data' // Important for FormData
+      try {
+        const response = await axios.post(API.USER.C_PROFILE, formData, {
+          headers: {
+            Authorization: dtoken,
+            'Content-Type': 'multipart/form-data' // Important for FormData
+          }
+        });
+        if (response?.data?.message === "Profile Created Successfully") {
+          await axios
+            .get(API.USER.PROFILE_DATA, {
+              headers: {
+                Authorization: dtoken,
+              },
+            })
+            .then(res => {
+              setUserInfo(res.data.user);
+              alert("Profile Created Successfully")
+              navigation.navigate("Interset", { data: Inter });
+            })
         }
-      });
-      if (response?.data?.message === "Profile Created Successfully") {
-        await axios
-          .get(API.USER.PROFILE_DATA, {
-            headers: {
-              Authorization: dtoken,
-            },
-          })
-          .then(res => {
-            setUserInfo(res.data.user);
-            alert("Profile Created Successfully")
-            navigation.navigate("Interset", { data: Inter });
-          })
+      } catch (error) {
+        console.log("ERROR==>", error);
       }
-    } catch (error) {
-      console.log("ERROR==>", error);
     }
   }
 
@@ -258,8 +263,8 @@ const Bio = ({ navigation }) => {
               Display Name
             </Text>
             <TextInput
-              placeholder="Jhon Abrahm"
-              placeholderTextColor={'#000'}
+              placeholder="Display Name"
+              placeholderTextColor={'#a0aec0'}
               value={dName}
               onChangeText={(text) => { setDName(text) }}
               style={{
@@ -287,8 +292,8 @@ const Bio = ({ navigation }) => {
             <TextInput
               value={rName}
               onChangeText={(text) => { setRName(text) }}
-              placeholder="James Willson"
-              placeholderTextColor={'#000'}
+              placeholder="Real Name"
+              placeholderTextColor={'#a0aec0'}
               style={{
                 borderBottomWidth: 1,
                 borderColor: '#5F5F5F',
@@ -314,8 +319,8 @@ const Bio = ({ navigation }) => {
             <TextInput
               value={age}
               onChangeText={(text) => { setAge(text) }}
-              placeholder="21"
-              placeholderTextColor={'#000'}
+              placeholder="Age"
+              placeholderTextColor={'#a0aec0'}
               keyboardType="number-pad"
               style={{
                 borderBottomWidth: 1,
@@ -362,7 +367,7 @@ const Bio = ({ navigation }) => {
                 <TextInput
                   editable={false}
                   placeholder="Select Gender"
-                  placeholderTextColor={'#000'}
+                  placeholderTextColor={'#a0aec0'}
                   value={selectedGender}
                   pointerEvents="none"
                   style={{
