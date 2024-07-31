@@ -1,118 +1,73 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { ToastProvider, useToast } from 'react-native-toast-notifications'
+import Route from './src/routes';
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-svg';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+export const ToastMessage = (message: string) => {
+  const toast = useToast();
+  toast.hideAll()
+  toast.show(message);
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+
+
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <ToastProvider
+      placement="top"
+      duration={5000}
+      animationType='slide-in'
+      animationDuration={250}
+      successColor="green"
+      dangerColor="red"
+      warningColor="orange"
+      normalColor="gray"
+      textStyle={{ fontSize: 15 }}
+      offset={50}
+      offsetTop={30}
+      offsetBottom={40}
+      swipeEnabled={true}
+    >
+      < Route />
+    </ToastProvider>
   );
 }
 
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  toast: {
+    width: 300,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  success: {
+    backgroundColor: 'green',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  error: {
+    backgroundColor: 'red',
   },
-  highlight: {
-    fontWeight: '700',
+  warning: {
+    backgroundColor: 'orange',
+  },
+  normal: {
+    backgroundColor: 'gray',
+  },
+  custom_toast: {
+    backgroundColor: 'blue',
+  },
+  text1: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  text2: {
+    color: 'lightgrey',
   },
 });
+
+
 
 export default App;

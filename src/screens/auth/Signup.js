@@ -14,6 +14,8 @@ import { API } from '../Api';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketContext } from '../../context/SocketContext';
+import { validateForm } from '../../core/helpers/validations';
+import { Toast } from 'react-native-toast-notifications';
 
 const Signup = ({ navigation }) => {
   const { setUserInstance, setUserInfo } = useContext(SocketContext);
@@ -21,52 +23,51 @@ const Signup = ({ navigation }) => {
   const [pass, setPass] = useState();
   const [name, setName] = useState();
   const [cpass, setCPass] = useState();
-  const [token, setToken] = useState();
+
+
 
   const handleSignUp = async () => {
-    try {
-      if (!name.trim() || !email.trim() || !pass.trim()) {
-        Alert.alert('Error', 'All fields are required.');
-        return;
-      }
-      let res = await axios.post(API.USER.SIGNUP, {
-        name: name,
-        email: email,
-        password: pass,
-      });
-      setUserInstance(res?.data);
-      setUserInfo(res?.data?.user)
-      await AsyncStorage.setItem('user', JSON.stringify(res?.data));
-      Alert.alert('Sign Up successful.');
-      navigation?.navigate('Bio');
-    } catch (error) {
-      if (error.response) {
-        // Server responded with a status other than 200 range
-        const status = error.response.status;
-        const message =
-          error.response.data.message || error.response.data.message;
+    const validate = validateForm(name, email, pass, cpass);
+    if (validate) {
+      Toast.hideAll()
+      try {
+        let res = await axios.post(API.USER.SIGNUP, {
+          name: name,
+          email: email,
+          password: pass,
+        });
+        setUserInstance(res?.data);
+        setUserInfo(res?.data?.user)
+        await AsyncStorage.setItem('user', JSON.stringify(res?.data));
+        Toast.show('Sign Up successful.');
+        navigation?.navigate('Bio');
+      } catch (error) {
+        if (error.response) {
+          // Server responded with a status other than 200 range
+          const status = error.response.status;
+          const message =
+            error.response.data.message || error.response.data.message;
 
-        if (status === 400) {
-          Alert.alert('Error', 'Bad request! All fields are required.');
-        } else if (status === 409) {
-          Alert.alert('Error', 'User already exists with this email.');
+          if (status === 400) {
+            Toast.show('Bad request! All fields are required.');
+          } else if (status === 409) {
+            Toast.show('User already exists with this email.');
+          } else {
+            Toast.show('Sign Up failed');
+          }
+        } else if (error.request) {
+          // Request was made but no response was received
+          console.error('Sign Up Error: No response received', error.request);
+          Toast.show(
+            'No response from server. Please try again later.',
+          );
         } else {
-          Alert.alert('Error', message || 'Sign Up failed');
+          // Something else happened while setting up the request
+          console.error('Sign Up Error:', error.message);
+          Toast.show(
+            'An error occurred during sign up. Please try again.',
+          );
         }
-      } else if (error.request) {
-        // Request was made but no response was received
-        console.error('Sign Up Error: No response received', error.request);
-        Alert.alert(
-          'Error',
-          'No response from server. Please try again later.',
-        );
-      } else {
-        // Something else happened while setting up the request
-        console.error('Sign Up Error:', error.message);
-        Alert.alert(
-          'Error',
-          'An error occurred during sign up. Please try again.',
-        );
       }
     }
   };
@@ -89,7 +90,8 @@ const Signup = ({ navigation }) => {
             }}
             onPress={() => {
               navigation.pop();
-            }}>
+            }}
+          >
             <Back_Arrow />
           </TouchableOpacity>
           <View
@@ -118,7 +120,7 @@ const Signup = ({ navigation }) => {
                   position: 'absolute',
                   bottom: 5,
                 }}>
-                Sign in to Bubber
+                Sign up to Bubber
               </Text>
             </View>
             <View style={{ width: 10 }}></View>
