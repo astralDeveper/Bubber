@@ -35,38 +35,45 @@ export const validateForm = (name, email, password, confirmPassword) => {
     return true;
 };
 
-export const bioValidation = (values) => {
-
-    if (!values.displayName.trim()) {
+export const bioValidation = (displayName, realName, age, gender) => {
+    // Check if displayName is a valid string and has at least 3 characters
+    Toast.hideAll()
+    if (typeof displayName !== 'string' || !displayName.trim()) {
         Toast.show('Display Name is required');
-        return false
-    } else if (values.displayName.length < 3) {
+        return false;
+    } else if (displayName.length < 3) {
         Toast.show('Display Name must be at least 3 characters long');
-        return false
+        return false;
     }
 
-    if (!values.realName.trim()) {
+    // Check if realName is a valid string and has at least 3 characters
+    if (typeof realName !== 'string' || !realName.trim()) {
         Toast.show('Real Name is required');
-        return false
-    } else if (values.realName.length < 3) {
+        return false;
+    } else if (realName.length < 3) {
         Toast.show('Real Name must be at least 3 characters long');
-        return false
+        return false;
     }
 
-    if (!values.age) {
+    // Check if age is a valid number and within the specified range
+    if (typeof age !== 'string' || !age.trim()) {
         Toast.show('Age is required');
-        return false
-    } else if (!Number.isInteger(Number(values.age)) || Number(values.age) <= 0 || Number(values.age) > 120) {
-        Toast.show('Age must be a positive integer between 1 and 120');
-        return false
+        return false;
+    } else {
+        const ageNumber = Number(age);
+        if (!Number.isInteger(ageNumber) || ageNumber <= 0 || ageNumber > 120) {
+            Toast.show('Age must be a positive integer between 1 and 120');
+            return false;
+        }
     }
 
-    if (!values.gender) {
+    // Check if gender is valid
+    if (typeof gender !== 'string' || !gender.trim()) {
         Toast.show('Gender is required');
-        return false
-    } else if (!['Male', 'Female'].includes(values.gender)) {
+        return false;
+    } else if (!['Male', 'Female', 'Other'].includes(gender)) {
         Toast.show('Invalid Gender');
-        return false
+        return false;
     }
 
     return true;

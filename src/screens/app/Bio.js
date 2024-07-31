@@ -110,8 +110,7 @@ const Bio = ({ navigation }) => {
     });
   };
   const onCreate = async () => {
-    const validate = bioValidation({ displayName: dName, realName: rName, age: age, gender: selectedGender });
-    console.log('validate', validate)
+    const validate = bioValidation(dName, rName, age, selectedGender);
     if (validate) {
       const formData = new FormData();
       formData.append('image', pivid); // Assuming pivid is a file or Blob
