@@ -34,11 +34,16 @@ const Interset = ({ navigation, route }) => {
   const { userInfo } = useContext(SocketContext);
 
   const getinter = async () => {
-    const data = await axios.put(API.USER.GET_INTERESTS, {
-      id: userInfo._id
-    })
-    setSelected(data.data.genderInterest)
-    setInterests(prev => [...prev, ...data.data.interests]);
+    try {
+
+      const data = await axios.put(API.USER.GET_INTERESTS, {
+        id: userInfo._id
+      })
+      setSelected(data.data.genderInterest)
+      setInterests(prev => [...prev, ...data.data.interests]);
+    } catch (error) {
+
+    }
   };
 
   const fetchData = async () => {
@@ -85,18 +90,22 @@ const Interset = ({ navigation, route }) => {
   };
 
   const onAdd = async () => {
-    const flatArray = flattenArray(interests)
-    await axios.put(API.USER.Add_Inter, {
-      interests: flatArray,
-      genderInterest: selected
-    }, {
-      headers: {
-        Authorization: dToken
-      }
-    });
-    navigation.navigate("BottomTabs");
-  }
+    try {
+      const flatArray = flattenArray(interests)
+      await axios.put(API.USER.Add_Inter, {
+        interests: flatArray,
+        genderInterest: selected
+      }, {
+        headers: {
+          Authorization: dToken
+        }
+      });
+      navigation.navigate("BottomTabs");
+    } catch (error) {
 
+    }
+  };
+  
   return (
     <SafeAreaView
       style={styles.mainContainer}>
@@ -107,7 +116,7 @@ const Interset = ({ navigation, route }) => {
             style={{
               margin: 20,
             }}
-            onPress={() => navigation.navigate("Message")}
+            onPress={() => navigation.navigate("BottomTabs")}
           >
             <Back_Arrow />
           </TouchableOpacity> :

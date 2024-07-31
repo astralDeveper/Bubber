@@ -24,12 +24,17 @@ function App(): React.JSX.Element {
       successColor="green"
       dangerColor="red"
       warningColor="orange"
-      normalColor="gray"
+      normalColor="#3EC8BF"
       textStyle={{ fontSize: 15 }}
       offset={50}
       offsetTop={30}
       offsetBottom={40}
       swipeEnabled={true}
+      style={{
+        borderRadius: 10,
+        borderLeftWidth:12,
+        borderLeftColor:'grey'
+      }}
     >
       < Route />
     </ToastProvider>

@@ -30,6 +30,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SocketContext } from '../../context/SocketContext';
 import { Inter } from '../Dummy';
 import { bioValidation } from '../../core/helpers/validations';
+import { Toast } from 'react-native-toast-notifications';
 const Bio = ({ navigation }) => {
   const { setUserInfo } = useContext(SocketContext);
   const [selectedGender, setSelectedGender] = useState('');
@@ -78,10 +79,7 @@ const Bio = ({ navigation }) => {
 
     launchImageLibrary(options, async response => {
       if (response.didCancel) {
-        Toast.show({
-          type: 'error',
-          text1: 'Canceled The upload',
-        });
+        Toast.show('Canceled The upload');
       } else if (response.error) {
 
       } else {
@@ -100,11 +98,11 @@ const Bio = ({ navigation }) => {
             setpivid(source);
           } else {
             // Unsupported media type
-            alert('Unsupported media type');
+            Toast.show('Unsupported media type');
           }
         } else {
           // No assets returned
-          alert('No media picked');
+          Toast.show('No media picked');
         }
       }
     });
@@ -136,7 +134,7 @@ const Bio = ({ navigation }) => {
             })
             .then(res => {
               setUserInfo(res.data.user);
-              alert("Profile Created Successfully")
+              Toast.show("Profile Created Successfully")
               navigation.navigate("Interset", { data: Inter });
             })
         }
