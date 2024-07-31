@@ -39,7 +39,6 @@ const Chat_Sen = ({ navigation, route }) => {
   const scrollViewRef = useRef(null);
   const [precipitant, setPrecipitant] = useState();
   const [loading, setLoading] = useState(false);
-  const [conversationID, setConversationID] = useState();
 
 
   const [isFirst, setisFirst] = useState(route.params.first);
@@ -390,7 +389,6 @@ const Chat_Sen = ({ navigation, route }) => {
                         setUserInfo(res.data.user)
                         setModalVisible(false)
                         setisFirst(false)
-                        setConversationID(generatedID)
                         Toast.show('If this person is already chatting with someone else and wants to chat with you, you will both be chatting with each other.')
                         //userInfo?.activeConversation == 'false' ?
                         // <Message onPress={sendMessage} /> :
