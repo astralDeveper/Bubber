@@ -26,6 +26,7 @@ export const API = {
     GET_CONVERSATIONS_ID: `${BASE_URL}/auth/get-conversation`,
     START_CONVERSATION: `${BASE_URL}/auth/conversations/start`,
     GET_INTERESTS: `${BASE_URL}/auth/get-interests`,
+    FORGET: `${BASE_URL}/auth/forgotPassword`,
     // UPDATE_DATA :`${BASE_URL}/test`,
   },
 };

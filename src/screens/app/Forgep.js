@@ -9,14 +9,31 @@ import {
 } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { Appl, Appl_B, Back_Arrow, Face, Goo } from '../../assets/Images';
+import axios from 'axios';
+import { API } from '../Api';
 import { emailValidation } from '../../core/helpers/validations';
+import { Toast } from 'react-native-toast-notifications';
 
 const Forgep = ({ navigation }) => {
   const [email, setEmail] = useState();
-  const submit = () => {
-    const validate = emailValidation(email);
-    if (validate) navigation.navigate('OTPScreen');
+  const [pass, setPass] = useState();
+  const [cpass, setCPass] = useState();
+  const submit = async () => {
+    try {
+      const validate = emailValidation(email, pass, cpass);
+      if (validate) {
+        const res = await axios.post(API.USER.FORGET, {
+          email,
+          password: pass
+        })
+        Toast.show(res.data.message);
+        navigation.navigate('Login');
+      }
+    } catch (error) {
+      Toast.show(error.response.data.error);
+    }
   }
+
   return (
     <SafeAreaView
       style={{
@@ -64,7 +81,7 @@ const Forgep = ({ navigation }) => {
                   position: 'absolute',
                   bottom: 5,
                 }}>
-                Forget Password
+                Reset Password
               </Text>
             </View>
             <View style={{ width: 10 }}></View>
@@ -100,6 +117,62 @@ const Forgep = ({ navigation }) => {
           </View>
           <View
             style={{
+              alignItems: 'center',
+              marginTop: 20,
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: '#3EC8BF',
+                width: width * 0.8,
+              }}>
+              Password
+            </Text>
+            <TextInput
+              value={pass}
+              onChangeText={text => {
+                setPass(text);
+              }}
+              secureTextEntry={true}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#5F5F5F',
+                color: '#000',
+                width: width * 0.8,
+                padding: 5,
+              }}
+            />
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+              marginTop: 20,
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                color: '#3EC8BF',
+                width: width * 0.8,
+              }}>
+              Confirm Password
+            </Text>
+            <TextInput
+              value={cpass}
+              onChangeText={text => {
+                setCPass(text);
+              }}
+              secureTextEntry={true}
+              style={{
+                borderBottomWidth: 1,
+                borderColor: '#5F5F5F',
+                color: '#000',
+                width: width * 0.8,
+                padding: 5,
+              }}
+            />
+          </View>
+          <View
+            style={{
               position: 'absolute',
               bottom: 30,
               alignItems: 'center',
@@ -107,9 +180,9 @@ const Forgep = ({ navigation }) => {
             }}>
             <TouchableOpacity
               onPress={submit}
-              disabled={email ? false : true}
+              disabled={email && pass && cpass ? false : true}
               style={{
-                backgroundColor: email ? '#33E0CF' : '#F3F6F6',
+                backgroundColor: email && pass && cpass ? '#33E0CF' : '#F3F6F6',
                 padding: 15,
                 alignItems: 'center',
                 borderRadius: 20,
@@ -118,11 +191,11 @@ const Forgep = ({ navigation }) => {
               }}>
               <Text
                 style={{
-                  color: email ? '#FFF' : '#797C7B',
+                  color: email && pass && cpass ? '#FFF' : '#797C7B',
                   fontSize: 25,
                   fontFamily: 'ABeeZee-Italic',
                 }}>
-                Forget Password
+                Reset Password
               </Text>
             </TouchableOpacity>
 
@@ -134,62 +207,3 @@ const Forgep = ({ navigation }) => {
 };
 const { height, width } = Dimensions.get('window');
 export default Forgep;
-
-
-
-{/* <View
-              style={{
-                alignItems: 'center',
-                marginTop: 20,
-              }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#3EC8BF',
-                  width: width * 0.8,
-                }}>
-                Password
-              </Text>
-              <TextInput
-                value={pass}
-                onChangeText={text => {
-                  setPass(text);
-                }}
-                secureTextEntry={true}
-                style={{
-                  borderBottomWidth: 1,
-                  borderColor: '#5F5F5F',
-                  color: '#000',
-                  width: width * 0.8,
-                  padding: 5,
-                }}
-              />
-            </View>
-            <View
-              style={{
-                alignItems: 'center',
-                marginTop: 20,
-              }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: '#3EC8BF',
-                  width: width * 0.8,
-                }}>
-               Confirm Password
-              </Text>
-              <TextInput
-             value={cpass}
-             onChangeText={text => {
-               setCPass(text);
-             }}
-                secureTextEntry={true}
-                style={{
-                  borderBottomWidth: 1,
-                  borderColor: '#5F5F5F',
-                  color: '#000',
-                  width: width * 0.8,
-                  padding: 5,
-                }}
-              />
-            </View> */}

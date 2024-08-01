@@ -1,9 +1,19 @@
 import { Toast } from "react-native-toast-notifications";
 
-export const emailValidation = (email) => {
+export const emailValidation = (email, password, confirmPassword) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         Toast.show('Invalid email address');
+        return false;
+    }
+    if (password.length < 6) {
+        Toast.show('Password must be at least 6 characters long');
+        return false;
+    }
+
+    // Validate confirm password
+    if (password !== confirmPassword) {
+        Toast.show('Passwords do not match');
         return false;
     }
     return true;
