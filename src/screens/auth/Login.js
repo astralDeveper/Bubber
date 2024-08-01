@@ -17,6 +17,7 @@ import axios from 'axios';
 import { API } from '../Api';
 import { useNavigation } from '@react-navigation/native';
 import { SocketContext } from '../../context/SocketContext';
+import { Toast } from 'react-native-toast-notifications';
 const Login = ({ navigation }) => {
   const { setUserInstance, setUserInfo } = useContext(SocketContext);
   const [email, setEmail] = useState();
@@ -59,7 +60,7 @@ const Login = ({ navigation }) => {
       })
       .then(async (response) => {
         if (response?.data) {
-          alert("Login Successfull")
+          Toast.show("Login Successfull")
           setUserInstance(response?.data);
           setUserInfo(response?.data?.user)
           await AsyncStorage.setItem('user', JSON.stringify(response?.data));
@@ -68,10 +69,10 @@ const Login = ({ navigation }) => {
       })
       .catch(response => {
         if (response?.message == 'Request failed with status code 404') {
-          alert('User not found with this email! .');
+          Toast.show('User not found with this email! .');
         }
         if (response?.message == 'Request failed with status code 405') {
-          alert('Incorrect email or password! .');
+          Toast.show('Incorrect email or password! .');
         }
       });
   };

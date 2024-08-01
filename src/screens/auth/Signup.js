@@ -262,10 +262,7 @@ const Signup = ({ navigation }) => {
               marginVertical: 40
             }}>
             <TouchableOpacity
-              onPress={() => {
-                // navigation.navigate("Bio")
-                pass === cpass ? handleSignUp() : alert('Wrong');
-              }}
+              onPress={handleSignUp}
               disabled={email && pass && name && cpass ? false : true}
               style={{
                 backgroundColor:

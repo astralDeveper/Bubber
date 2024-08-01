@@ -15,6 +15,7 @@ import { API } from '../Api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { SocketContext } from '../../context/SocketContext';
+import { Toast } from 'react-native-toast-notifications';
 const Profile = ({ navigation }) => {
   const { userInfo, setUserInfo } = useContext(SocketContext);
 
@@ -76,7 +77,7 @@ const Profile = ({ navigation }) => {
           ...res?.data.user
         }));
 
-        alert('Data Updated Successfully');
+        Toast.show('Data Updated Successfully');
         navigation.goBack()
       })
       .catch(error => {
